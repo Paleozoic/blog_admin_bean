@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.paleo.blog.service.sys.role.dao.IRoleDao">
+		
+  	<sql id="role_sql">
+		SELECT role.role_id as roleId,role.role_name as roleName,role.role_group_id as roleGroupId,role.status,
+		roleGroup.role_group_name as roleGroupName
+		FROM blog_admin.sys_role role
+		INNER JOIN blog_admin.sys_role_group roleGroup
+		ON roleGroup.role_group_id = role.role_group_id
+	</sql>
+	
+  	<!-- 角色列表 -->
+  	<select id="getRoleList" resultType="com.paleo.blog.pojo.sys.role.Role">
+  	    <include refid="role_sql" />
+  	    INNER JOIN blog_admin.sys_user_roles uroles
+  	    ON uroles.role_id = role.role_id AND uroles.user_id = #{userId}
+  	    WHERE role.status=1 AND uroles.is_managed=1  
+  	</select>
+  	
+  	<!-- 角色列表（分页） -->
+  	<select id="showRolePage" resultType="com.paleo.blog.pojo.sys.role.Role" useCache="false">
+  	    <include refid="role_sql" />
+  	    WHERE role.status=1
+  	    AND roleGroup.tree LIKE '%.${bo.roleGroup.roleGroupId}.%'
+		<if test="bo.roleGroup.roleGroupName!=null and bo.droleGroup.roleGroupName.length() &gt; 0">
+		    AND roleGroup.role_group_name LIKE '%${bo.roleGroup.roleGroupName}%'
+		</if>
+		<if test="bo.role!=null">
+			<if test="bo.role.roleName!=null and bo.role.roleName.length() &gt; 0">
+			    AND role.role_name LIKE '%${bo.role.roleName}%'
+			</if>
+		</if>
+  	</select>
+  	
+  	<!-- 新增角色 -->
+	<insert id="addRole"  useGeneratedKeys="true" keyProperty="bo.roleId">
+		INSERT INTO 
+			blog_admin.sys_role(role_group_id,role_name)
+		VALUES
+			(#{bo.roleGroupId},#{bo.roleName})
+	</insert>
+	<!--用户已授权的角色 -->
+  	<select id="getUserRoleList" resultType="com.paleo.blog.pojo.sys.role.Role">
+  	    SELECT role.role_id as roleId,role.role_name as roleName,
+  	    uroles.is_managed as isManaged
+  	    FROM blog_admin.sys_user_roles uroles 
+  	    INNER JOIN blog_admin.sys_role role ON uroles.role_id = role.role_id 
+  	    WHERE uroles.user_id = #{userId} AND role.status=1
+  	</select>
+  	<!-- 获取角色 by id -->
+  	<select id="getRoleById" resultType="com.paleo.blog.pojo.sys.role.Role">
+  	    <include refid="role_sql" />
+  	    WHERE role.role_id = #{roleId}
+  	</select>
+  	<!-- 更新角色 -->
+  	<update id="updateRole">
+  	    UPDATE blog_admin.sys_role
+  	    <set>
+  	        <if test="bo.roleName!=null and bo.roleName.length() &gt; 0">
+				role_name = #{bo.roleName},
+			</if>
+  	    </set>
+  	    WHERE role_id=#{bo.roleId}
+  	</update>
+  	<!-- 删除角色（逻辑删除） -->
+  	<update id="deleteRoleById">
+  	    UPDATE blog_admin.sys_role
+  	    SET role.status=0
+  	    WHERE role_id=#{roleId}
+  	</update>
+  	<!-- 删除角色菜单（物理删除） -->
+	<delete id="deleteRoleMenusById">
+	    DELETE FROM blog_admin.sys_role_menus 
+	    WHERE role_id=#{roleId}
+	</delete>
+	<!-- 删除角色用户（物理删除） -->
+	<delete id="deleteUserRolesByRoleId">
+	    DELETE FROM blog_admin.sys_user_roles 
+	    WHERE role_id=#{roleId}
+	</delete>
+	<!-- 增加角色菜单 -->
+	<insert id="addRoleMenus">
+	    INSERT INTO blog_admin.sys_role_menus(role_id,menu_id)VALUES
+	    <foreach collection="menuList" item="menu"  separator="," >
+	        (#{role.roleId},#{menu.menuId})
+	    </foreach>
+	</insert>
+	<!-- 获取某角色组的用户（不包含子角色组） -->
+	<select id="getRoleListInGroup" resultType="com.paleo.blog.pojo.sys.role.Role"  >
+		<include refid="role_sql"/>
+		WHERE role.role_group_id = #{bo.roleGroupId} AND role.status=1
+	</select>
+</mapper>
+

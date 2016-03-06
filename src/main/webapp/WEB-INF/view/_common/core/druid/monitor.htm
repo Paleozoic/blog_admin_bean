@@ -1,0 +1,16 @@
+
+<script>
+(function(navtab){
+	$(this).navtab('closeCurrentTab');//关闭当前navtab
+	$(this).navtab({id:'druidMonitor', url:'druid', external:true,title:'Druid监控'});//重新以iframe打开
+	/**
+	这里用了原生的navtab，其实druid提供了json的api，可以用来实现自己的monitor
+	例如：
+	页面：
+	http://127.0.0.1:8080/blog_admin/druid/sql.html
+	其json数据为：
+	http://127.0.0.1:8080/blog_admin/druid/sql.json
+	**/
+})($.CurrentNavtab);
+  
+</script>

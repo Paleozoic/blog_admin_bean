@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.paleo.blog.service.sys.menu.dao.IMenuDao">
+
+    	<sql id="menu_sql">
+			SELECT menu.menu_id as menuId,menu.menu_code as menuCode, menu.type, menu.upper_menu_id as upperMenuId, menu.menu_name as menuName, menu.level, menu.order_no as orderNo, menu.url, menu.tree
+			FROM blog_admin.sys_menu menu
+		</sql>
+		<!-- 获取所有菜单列表（包括功能菜单） -->
+		<select id="getMenuList" resultType="com.paleo.blog.pojo.sys.menu.Menu"  >
+			<include refid="menu_sql"/>
+			WHERE menu.status=1
+			ORDER BY menu.level,menu.order_no
+		</select>
+		<!-- 获取子菜单列表 -->
+		<select id="showMenuChildrenPage" resultType="com.paleo.blog.pojo.sys.menu.Menu"  useCache="false">
+			<include refid="menu_sql"/>
+			WHERE menu.status=1 
+			AND menu.upper_menu_id = #{bo.menuId} 	  <!-- bo.menuId指的是功能菜单的父级menuId -->
+			<if test="bo.menuName!=null and bo.menuName.length() &gt; 0">
+			    AND menu.menu_name LIKE '%${bo.menuName}%' <!-- bo.menuName指的是功能菜单的menuName，不是upperMenu -->
+			</if>
+			<if test="bo.menuCode!=null and bo.menuCode.length() &gt; 0">
+			    AND menu.menu_code LIKE '%${bo.menuCode}%' <!-- bo.menuName指的是功能菜单的menuName，不是upperMenu -->
+			</if>
+			ORDER BY menu.level,menu.order_no
+		</select>
+		<!-- 获取菜单 by menuId -->
+		<select id="getMenuById" resultType="com.paleo.blog.pojo.sys.menu.Menu"  >
+			<include refid="menu_sql"/>
+			WHERE menu.menu_id = #{menuId} AND menu.status=1
+		</select>
+		
+		<!-- 新增菜单 -->
+		<insert id="addMenu" useGeneratedKeys="true" keyProperty="bo.menuId" >
+		    INSERT INTO blog_admin.sys_menu(type,upper_menu_id,menu_code,menu_name,level,order_no,url,tree) 
+		    VALUES(#{bo.type},#{bo.upperMenuId},#{bo.menuCode},#{bo.menuName},#{bo.level},#{bo.orderNo},#{bo.url},#{bo.tree})
+		</insert>
+		
+		<!-- 更新机构 -->
+		<update id="updateMenu">
+			UPDATE blog_admin.sys_menu 
+			<set>
+				<if test="bo.tree!=null and bo.tree.length() &gt; 0">
+					tree = #{bo.tree},
+				</if>
+				<if test="bo.menuCode!=null and bo.menuCode.length() &gt; 0">
+					menu_code = #{bo.menuCode},
+				</if>
+				<if test="bo.upperMenuId!=null">
+					upper_menu_id = #{bo.upperMenuId},
+				</if>
+				<if test="bo.type!=null">
+					type = #{bo.type},
+				</if>
+				<if test="bo.level!=null">
+					level = #{bo.level},
+				</if>
+				<if test="bo.orderNo!=null">
+					order_no = #{bo.orderNo},
+				</if>
+				<if test="bo.menuName!=null and bo.menuName.length() &gt; 0">
+					menu_name = #{bo.menuName},
+				</if>
+					url = #{bo.url},
+				<if test="bo.status!=null">
+					status = #{bo.status},
+				</if>
+			</set>
+			WHERE menu_id = #{bo.menuId}
+		</update>
+		<!-- 删除菜单 by menuId,逻辑删除-->
+		<update id="deleteMenu" >
+			UPDATE  blog_admin.sys_menu
+			SET status=0
+			WHERE menu_id = #{menuId}
+		</update>
+		<!-- 删除菜单 by menuId,逻辑删除 -->
+		<delete id="deleteMenuIncludeChildrenById" >
+			UPDATE  blog_admin.sys_menu
+			SET status=0
+			WHERE menu_id = #{menuId} OR upper_menu_id=#{menuId}
+		</delete>
+		<!--角色授权的菜单-->
+	  	<select id="getRoleMenuList" resultType="com.paleo.blog.pojo.sys.menu.Menu">
+	  	    SELECT menu.menu_id as menuId, menu.menu_code as menuCode, menu.type, menu.upper_menu_id as upperMenuId, menu.menu_name as menuName, menu.level, menu.order_no as orderNo, menu.url, menu.tree
+			FROM blog_admin.sys_menu menu
+			INNER JOIN blog_admin.sys_role_menus rmenu
+			ON menu.menu_id = rmenu.menu_id
+			WHERE rmenu.role_id = #{roleId}
+	  	</select>
+		<!-- Menu排序（只允许系统管理员对所有菜单排序） -->
+		<update id="sortMenu">
+            UPDATE blog_admin.sys_menu
+            <trim prefix="SET" suffixOverrides=",">
+	            <trim prefix=" upper_menu_id = CASE" suffix="END,">
+	                <foreach collection="menuList" item="menu" >
+	                        <if test="menu.upperMenuId!=null">
+	                         WHEN menu_id=#{menu.menuId} THEN #{menu.upperMenuId}
+	                        </if>
+	                </foreach>
+	             </trim>
+	             <trim prefix=" level = CASE" suffix="END,">
+	                 <foreach collection="menuList" item="menu">
+	                         <if test="menu.level!=null">
+	                          WHEN menu_id=#{menu.menuId} THEN #{menu.level}
+	                         </if>
+	                 </foreach>
+	              </trim>
+	              <trim prefix=" order_no =CASE" suffix="END," >
+	                 <foreach collection="menuList" item="menu" >
+	                         <if test="menu.orderNo!=null">
+	                          WHEN menu_id=#{menu.menuId} THEN #{menu.orderNo}
+	                         </if>
+	                 </foreach>
+	              </trim>
+	       		  <trim prefix=" tree =CASE" suffix="END," >
+	                  <foreach collection="menuList" item="menu">
+	                          <if test="menu.tree!=null and menu.tree.length() &gt; 0">
+	                           WHEN menu_id=#{menu.menuId} THEN #{menu.tree}
+	                          </if>
+	                  </foreach>
+	           	  </trim>
+            </trim>
+            WHERE menu_id IN
+            <foreach collection="menuList" separator="," item="menu" close=")" open="(" >
+              #{menu.menuId}
+          	</foreach>
+		</update>
+		<!--用户已授权的菜单(需要去除不同角色授权相同的菜单) -->
+	  	<select id="getUserMenuList" resultType="com.paleo.blog.pojo.sys.menu.Menu">
+	  	    SELECT  menu.menu_id as menuId, menu.menu_code as menuCode,menu.type, menu.upper_menu_id as upperMenuId, menu.menu_name as menuName, menu.level, menu.order_no as orderNo, menu.url, menu.tree 
+	  	    FROM blog_admin.sys_user_roles uroles 
+	  	    INNER JOIN blog_admin.sys_role role ON uroles.role_id = role.role_id 
+	  	    INNER JOIN blog_admin.sys_role_menus rmenus ON rmenus.role_id = role.role_id 
+	  	    INNER JOIN blog_admin.sys_menu menu ON menu.menu_id = rmenus.menu_id 
+	  	    WHERE uroles.user_id = #{userId} AND role.status=1
+	  	    GROUP BY menu.menu_id <!-- GROUP BY用作去除相同menu_id的选项  -->
+	  	</select>
+	  	<!-- 判断标识码是否存在，status不作限制 -->
+		<select id="isUnique" resultType="com.paleo.blog.pojo.sys.menu.Menu"  >
+			<include refid="menu_sql"/>
+			WHERE  menu.menu_code=#{bo.menuCode}
+		</select>
+		
+		<select id="getMenuByMenuCodes" resultType="com.paleo.blog.pojo.sys.menu.Menu">
+			SELECT menu.menu_name as menuName,upperMenu.menu_name as upperMenuName FROM blog_admin.sys_menu menu 
+			LEFT JOIN blog_admin.sys_menu upperMenu
+			ON upperMenu.menu_id = menu.upper_menu_id
+			WHERE menu.menu_code IN 
+			<foreach collection="menuList" item="menu" open="(" close=")" separator=",">
+				#{menu.menuCode}
+			</foreach>
+			ORDER BY FIELD(menu.menu_code,
+			<foreach collection="menuList" item="menu" separator=",">
+				#{menu.menuCode}
+			</foreach>
+			)
+		</select>
+</mapper>
+

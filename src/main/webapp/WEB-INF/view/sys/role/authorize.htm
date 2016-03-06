@@ -1,0 +1,90 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent tpl-border" style="margin: 2px; padding: 0;">
+   <div style="float:left;margin-right:15px;">
+	    <div class="alert alert-info form-inline"><i class="fa fa-info-circle"></i> 角色[${role.roleName}]授权</div>
+	    <div autoHeight="6" style="border-right-width: 0px;border-right-style: solid;" class="tpl-border-color">
+	      <ul id="menuTree_${pageId}" class="ztree"></ul>
+	    </div>
+    </div>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button id="saveBtn_${pageId}" type="button" class="btn-green">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+  //ztree设置
+  var setting = {
+      view: {
+    	fontCss:setFontCss, 
+        dblClickExpand: false
+      },
+      data: {
+        simpleData: {
+          enable:true,
+          idKey: "menuId",
+          pIdKey: "upperMenuId",
+          rootPId: "0"
+        },
+        key: {
+          name: "menuName"
+        }
+      },
+      check: {
+    	  enable:true,
+    	  chkStyle:"checkbox",
+    	  chkboxType:{ "Y": "s", "N": "s" }
+      }
+    };
+
+  //FreeMarker拼接的ztree节点（菜单数据）
+  var menuArray =
+   [
+    <#list checkedMenuList as menu>
+      {
+        'menuId': ${menu.menuId}, 
+        'menuName': '${menu.menuName}',
+        'type': ${menu.type},
+        'upperMenuId': ${menu.upperMenuId},
+        'menuLevel': ${menu.level},
+        'orderNo': ${menu.orderNo},
+        'menuUrl': '${menu.url}',
+        'tree': '${menu.tree}',
+        <#if menu.checked==true> 'checked':'true',</#if>
+        'open': true
+      }
+      <#if menu_has_next>,</#if>
+    </#list>];
+  //初始化ztree
+  $.fn.zTree.init($("#menuTree_${pageId}", curdlg), setting, menuArray);
+  
+  /*
+   * 设置字体颜色，主要针对功能菜单
+   */
+  function setFontCss(treeId, treeNode){
+	  if(treeNode.type==1){
+		  return {color:"green"};
+	  }
+  }
+  
+  $("#saveBtn_${pageId}",curdlg).click(function(){
+	   var treeObj = $.fn.zTree.getZTreeObj("menuTree_${pageId}");
+	   console.log(treeObj.getCheckedNodes(true));
+	   $.ajax({
+          type:"POST",
+          url:"sys/role/authorize",
+          data: {"opt":"authorize","roleId":${role.roleId},"menuTreeArray":JSON.stringify(treeObj.getCheckedNodes(true))},
+          success:function(msg){
+            $(this).alertmsg('correct',msg);
+            curdlg.dialog("closeCurrent");
+          },
+          error:function(data){
+            $(this).alertmsg('error',data.responseText);
+          }
+     	});
+  });
+})($.CurrentDialog);
+  
+</script>

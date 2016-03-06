@@ -1,0 +1,45 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+    <form class="pageForm" action="sys/role_group/add"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
+    	<input type="hidden" name="opt" value="add">
+    	<input type="hidden" id="upperRoleGroupId_${pageId}" name="upperRoleGroupId" value="${bo.upperRoleGroupId}"/>
+    	<input type="hidden" name="orderNo" value="${bo.orderNo}"/>
+        <table class="table table-condensed table-hover">
+            <tbody>
+                <tr>
+                    <td>
+                        <label for="upperRoleGroupName_${pageId}" class="control-label x90">上级角色组：</label>
+                        <input type="text" id="upperRoleGroupName_${pageId}" name="upperRoleGroupName" value="${bo.upperRoleGroupName}" data-rule="required;length[~100]"  placeholder="请选择上级角色组" readonly size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="roleGroupName_${pageId}" class="control-label x90">角色组名：</label>
+                        <input type="text" id="roleGroupName_${pageId}"  name="roleGroupName"  data-rule="required;length[~100]" maxlength="100" size="20" >
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button type="submit" class="btn-green">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+	<#if !bo.upperRoleGroupId??>//如果是从ztree打开的新增，则禁止更改父机构
+	roleGroupSelect.singleSelect(1,$("#upperRoleGroupName_${pageId}",curdlg),function(roleGroupSelected){
+		$("#upperRoleGroupId_${pageId}",curdlg).val(roleGroupSelected.roleGroupId);
+		$("#upperRoleGroupName_${pageId}",curdlg).val(roleGroupSelected.roleGroupName);
+		if(!roleGroupSelected.roleGroupId) return;//弹出框清空
+		//计算orderNo
+		var treeObj = $.fn.zTree.getZTreeObj("${roleGroupTreeId}");
+		var treeNode = treeObj.getNodeByParam("roleGroupId", roleGroupSelected.roleGroupId, null);
+		$("input[name='orderNo']",curdlg).val(Common.isEmpty(treeNode.children)?1:treeNode.children.length+1);
+	});
+	</#if>
+})($.CurrentDialog);
+</script>

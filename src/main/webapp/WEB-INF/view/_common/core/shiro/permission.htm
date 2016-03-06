@@ -1,0 +1,32 @@
+
+<div class="bjui-pageContent tableContent">
+    <table data-toggle="tablefixed" class="table table-bordered"  >
+    	<thead>
+    	<tr>
+    		<th>URL</th>
+    		<th>PERMISSION</th>
+    		<th>菜单名</th>
+    		<th>父级菜单</th>
+    	</tr>
+    	</thead>
+    	<tbody>
+    	<#list permsList as perms>
+    	<tr>
+			<td>${perms.url}</td>
+			<td>${perms.perms}</td>
+			<td>${perms.menuName}</td>
+			<td>${perms.upperMenuName}</td>
+		</tr>
+    	</#list>
+    	</tbody>
+    </table>
+</div>
+
+<#--
+<#list chains?keys as url>
+    	<tr>
+			<td>${url}</td>
+			<td>${chains[url]}</td>
+		</tr>
+    	</#list>
+-->

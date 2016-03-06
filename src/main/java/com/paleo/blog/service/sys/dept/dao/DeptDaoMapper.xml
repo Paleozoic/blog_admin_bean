@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.paleo.blog.service.sys.dept.dao.IDeptDao">
+    
+    <sql id="dept_sql">
+		SELECT dept.dept_id as deptId, dept.upper_dept_id as upperDeptId, dept.dept_name as deptName, dept.level, dept.order_no as orderNo, dept.tree,
+		upperDept.dept_name as upperDeptName
+		FROM blog_admin.sys_dept dept 
+		LEFT JOIN blog_admin.sys_dept upperDept ON dept.upper_dept_id = upperDept.dept_id
+	</sql>
+	
+    <!-- 获取部门的下级部门列表 -->
+	<select id="getDeptList" resultType="com.paleo.blog.pojo.sys.dept.Dept"  >
+		<include refid="dept_sql"/>
+		WHERE dept.status=1
+		AND dept.tree LIKE '%.${bo.deptId}.%'
+		ORDER BY dept.level,dept.order_no
+	</select>
+	
+	<!-- 获取部门的下级部门列表(只包含一级) -->
+	<select id="getChildDeptList" resultType="com.paleo.blog.pojo.sys.dept.Dept"  >
+		<include refid="dept_sql"/>
+		WHERE dept.status=1
+		AND dept.upper_dept_id = #{bo.deptId}
+		ORDER BY dept.level,dept.order_no
+	</select>
+	
+	<!-- 获取部门列表(分页) -->
+	<select id="showDeptPage" resultType="com.paleo.blog.pojo.sys.dept.Dept" useCache="false" >
+		<include refid="dept_sql"/>
+		WHERE dept.status=1
+		AND dept.tree LIKE '%.${bo.deptId}.%'
+		<if test="bo.deptName!=null and bo.deptName.length() &gt; 0">
+		    AND dept.dept_name LIKE '%${bo.deptName}%'
+		</if>
+		ORDER BY dept.tree
+	</select>
+			
+	<!-- 根据deptId获取机构信息 -->
+	<select id="getDeptById" resultType="com.paleo.blog.pojo.sys.dept.Dept">
+		<include refid="dept_sql"/>
+		WHERE dept.dept_id = #{deptId} AND dept.status=1
+	</select>
+	
+	<!-- 新增机构 -->
+	<insert id="addDept"  useGeneratedKeys="true" keyProperty="bo.deptId">
+		INSERT INTO 
+			blog_admin.sys_dept(dept_name, upper_dept_id, order_no, level,tree)
+		VALUES
+			(#{bo.deptName}, #{bo.upperDeptId}, #{bo.orderNo}, #{bo.level}, #{bo.tree})
+	</insert>
+	<!-- 更新机构 -->
+	<update id="updateDept">
+		UPDATE blog_admin.sys_dept 
+		<set>
+			<if test="bo.tree!=null and bo.tree.length() &gt; 0">
+				tree = #{bo.tree},
+			</if>
+			<if test="bo.level!=null">
+				level = #{bo.level},
+			</if>
+			<if test="bo.deptName!=null and bo.deptName.length() &gt; 0">
+				dept_name = #{bo.deptName},
+			</if>
+			<if test="bo.upperDeptId!=null">
+				upper_dept_id = #{bo.upperDeptId},
+			</if>
+			<if test="bo.status!=null ">
+				status = #{bo.status},
+			</if>
+			<if test="bo.orderNo!=null">
+				order_no = #{bo.orderNo},
+			</if>
+		</set>
+		WHERE dept_id = #{bo.deptId}
+	</update>
+	<!-- 更新机构树-->
+	<update id="updateTrees">
+		UPDATE blog_admin.sys_dept 
+		SET tree = REPLACE(tree,#{oldTree},#{newTree}),
+		level = level+#{levRes} 
+		WHERE tree LIKE '.${oldTree}%'
+	</update>
+	<!-- 删除机构,逻辑删除 -->
+	<update id="deleteDeptById" >
+		UPDATE  blog_admin.sys_dept
+		SET status=0
+		WHERE dept_id = #{deptId}
+	</update>	
+</mapper>
+

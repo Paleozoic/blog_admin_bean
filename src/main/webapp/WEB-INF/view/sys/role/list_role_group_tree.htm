@@ -1,0 +1,104 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent tpl-border" style="margin: 2px; padding: 0;">
+    <div style="float:left;margin-right:15px;">
+		<div  style="border-right-width: 0px;border-right-style: solid;" class="tpl-border-color">
+			<ul id="roleGroupTree_${pageId}" class="ztree"></ul>
+		</div>
+    </div>
+    <div id="roleList_${pageId}" style="margin-left:209px; height:100%; overflow:hidden;">
+    </div>
+</div>
+<script>
+	(function(navtab){
+		
+		var setting = {
+		        view: {
+		           addHoverDom: addHoverDom,
+		           removeHoverDom: removeHoverDom,
+		           dblClickExpand: false,
+		           selectedMulti: false
+		        },
+				data: {
+					simpleData: {
+						enable:true,
+						idKey: "roleGroupId",
+						pIdKey: "upperRoleGroupId",
+						rootPId: "0"
+					},
+					key: {
+						name: "roleGroupName"
+					}
+				},
+		        callback: {
+		          onClick: onClick
+		        }
+			};
+	
+		  //FreeMarker拼接的ztree节点（roleGroup数据）
+		  var roleGroupArray =[
+			<#list roleGroupList as roleGroup>
+				{
+					'roleGroupId': ${roleGroup.roleGroupId}, 
+					'roleGroupName': '${roleGroup.roleGroupName}',
+					'upperRoleGroupId': ${roleGroup.upperRoleGroupId},
+					'roleGroupLevel': ${roleGroup.level},
+			        'orderNo': ${roleGroup.orderNo},
+			        'tree': '${roleGroup.tree}',
+					'open': true
+				}
+				<#if roleGroup_has_next>,</#if>
+			</#list>];
+		  
+		  /**
+		   * ztree节点点击事件
+		   **/
+		  function onClick(event, treeId, treeNode) {
+		    if(Common.isEmpty(treeNode.roleGroupId)) return;
+		    $(event.target).bjuiajax("doLoad", {loadingmask:false,url:"sys/role/list_role",data:{"roleGroup.roleGroupId":treeNode.roleGroupId},target:"#roleList_${pageId}"});
+		  }
+		  /**
+		   * 鼠标悬停时增加图标和绑定事件
+		   **/
+		  function addHoverDom(treeId, treeNode) {
+		    var aObj = $("#" + treeNode.tId + "_a");
+		    if ($("#addBtn_"+treeNode.roleGroupId, navtab).length>0) return;
+		    var btnStr = "";
+		    <@shiro.hasPermission name="sys.role.add">
+		    btnStr +=  "<span  class='tree_add' id='addBtn_" + treeNode.roleGroupId+ "' title='添加'></span>"
+		    </@shiro.hasPermission>
+		    
+		    aObj.append(btnStr);
+		    //点击增加btn
+		    $("#addBtn_"+treeNode.roleGroupId, navtab).click(function(){
+		      //弹出窗口新增，提交后台后返回新增成功，ztree添加节点
+		      $(this).dialog({
+		        id:"add_role_group_dlg",
+		        title:"新增角色",
+		        type:"POST",
+		        width:500,
+		        height:400,
+		        mask:true,
+		        data:{"roleGroupId":treeNode.roleGroupId,"roleGroupName":treeNode.roleGroupName},
+		        url:"sys/role/add"
+		      });
+		    });
+		  }
+		  /**
+		   * 鼠标悬停的图标和绑定事件移除
+		   **/
+	   	 function removeHoverDom(treeId, treeNode) {
+		    $("#addBtn_"+treeNode.roleGroupId, navtab).unbind().remove();
+		    $("#addBtn_space_" +treeNode.roleGroupId, navtab).unbind().remove();
+		  }
+ 
+			var roleGroupTree = $.fn.zTree.init($("#roleGroupTree_${pageId}", navtab), setting, roleGroupArray);
+			var treeObj =  $.fn.zTree.getZTreeObj("roleGroupTree_${pageId}");
+			var nodes = treeObj.getNodes();
+			if (nodes.length>0) {
+			  treeObj.selectNode(nodes[0]);
+			  $(".curSelectedNode",navtab).trigger("click");
+			}
+	
+	})($.CurrentNavtab);
+	
+</script>

@@ -1,0 +1,61 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+    <form class="pageForm" action="sys/user/authorize"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
+    	<input type="hidden" name="opt" value="authorize">
+    	<input type="hidden"  name="user.userId" value="${user.userId}"/>
+	    <div class="alert alert-info form-inline"><i class="fa fa-info-circle"></i> 用户[${user.userName}]的授权：</div>
+	    <div class="alert alert-danger form-inline"><i class="fa fa-info-circle"></i>(已选角色应该加一列checkbox，表示用户是否拥有该角色的授权权限0.0#但是前端比较渣，搁置)</div>
+	    <br></br>
+	    <select multiple id="role_${pageId}" name="roleList.roleIds" class="multiselect" >
+	        <#list selectedRoleList as role>
+	        	<option value="${role.roleId}" <#if role.selected==true>selected</#if> >${role.roleName}</option>
+	        </#list>
+	     </select>
+	     <#list selectedRoleList as role>
+	         <#if role.selected==true>
+	         	<input type="hidden"  name="roleList[${role_index}].roleId" value="${role.roleId}"/>
+	         	<!-- 这里的样式我实在是无能为力了 0.0# start -->
+	         	<!--  
+	         	<div class="ms-selection">
+	         		<label class="bg-success" style="font-size:25px;">是否可管理</label>
+	         		<ul class="ms-list" tabindex="-1">
+	         			<li selected="" class="ms-elem-selection ms-selected" id="49-selection" style="">
+	         				<input <#if role.isManaged==1>checked</#if> type="checkbox" name="isManagedRole" data-toggle="icheck" data-label="" value="${role.roleId}" >
+	         			</li>
+	         		</ul>
+	         	</div>
+	         	-->
+	         	<!-- 这里的样式我实在是无能为力了 0.0# end -->
+	         </#if> 
+	     </#list>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button type="submit" class="btn-green">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+	$('#role_${pageId}',curdlg).multiSelect(
+	    {
+	      selectableHeader: "<label class='bg-success' style='font-size:25px;'>未选角色</label>",
+	      selectionHeader: "<label class='bg-success' style='font-size:25px;'>已选角色(无管理权)</label>",
+	      afterSelect:function(val){
+	    	  $(".pageForm",curdlg).append('<input type="hidden"  name="roleList.roleId" value="'+val+'"/>');
+	    	  setRoleIndex();
+	      },
+	      afterDeselect:function(val){
+	    	  $("input[name^='roleList'][name$='.roleId'][value="+val+"]",curdlg).remove();
+	    	  setRoleIndex();
+	      }
+	    }
+	 );
+	function setRoleIndex(){
+		$("input[name^='roleList'][name$='.roleId']").each(function(index){
+			$(this).attr('name','roleList['+index+'].roleId');
+		})
+	}
+})($.CurrentDialog);
+</script>

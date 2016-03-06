@@ -1,0 +1,56 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+    <form class="pageForm" action="sys/user/edit"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
+    	<input type="hidden" name="opt" value="update">
+    	<input type="hidden" name="userId" value="${bo.userId}"/>
+    	<input type="hidden" id="deptId_${pageId}" name="deptId" value="${bo.deptId}"/>
+        <table class="table table-condensed table-hover">
+            <tbody>
+                <tr>
+                    <td>
+                        <label for="deptName_${pageId}" class="control-label x90">所属部门：</label>
+                        <input type="text"  id="deptName_${pageId}" name="deptName"  value="${bo.deptName}"  data-rule="required;length[~100];"  placeholder="请选择部门" readonly size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="realName_${pageId}" class="control-label x90">姓名：</label>
+                        <input type="text" id="realName_${pageId}"  name="realName"  value="${bo.realName}" data-rule="required;length[~20];" maxlength="20" size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="userName_${pageId}" class="control-label x90">用户名：</label>
+                        <input type="text" id="userName_${pageId}"  name="userName"   value="${bo.userName}" data-rule-username="[/^[a-z | A-Z]\w{0,100}/, '字母开头，只能是字母、数字和下划线']" data-rule="required;length[5~100];username;remote[sys/user/is_unique, userId]" maxlength="100" size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="password_${pageId}" class="control-label x90">重置密码：</label>
+                        <input type="password" id="password_${pageId}"  name="password"   data-rule-pwd="[/^[\w]{0,30}$/, '只能是字母、数字和下划线']" data-rule="密码:required;length[6~30];pwd;" maxlength="30" size="20">
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="passwordRepeat_${pageId}" class="control-label x90">确认密码：</label>
+                        <input type="password" id="passwordRepeat_${pageId}"  name="passwordRepeat"   data-rule="确认密码:length[~30];match[password];" maxlength="30" size="20">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button type="submit" class="btn-green">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+	deptSelect.singleSelect(1,$("#deptName_${pageId}",curdlg),function(deptSelected){
+		$("#deptId_${pageId}",curdlg).val(deptSelected.deptId);
+		$("#deptName_${pageId}",curdlg).val(deptSelected.deptName);
+	});
+})($.CurrentDialog);
+</script>

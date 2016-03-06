@@ -1,0 +1,34 @@
+
+<#-- 页面显示 -->
+<#macro pagination pageInfo>
+  <#-- 分页插件 -->
+  <#assign totalPage = pageInfo.getPages() >
+  <div class="bjui-pageFooter" style="height: 28px;">
+      <div class="pages">
+          <span>每页&nbsp;</span>
+          <div class="selectPagesize">
+              <select data-toggle="selectpicker" data-toggle-change="changepagesize">
+                  <option value="30" <#if pageInfo.getPageSize() ==30> selected="selected" </#if> >30</option>
+          		  <option value="50" <#if pageInfo.getPageSize() ==50> selected="selected" </#if> >50</option>
+          		  <option value="100" <#if pageInfo.getPageSize() ==100> selected="selected" </#if> >100</option>
+              </select>
+          </div>
+         <span>数据，共${pageInfo.getTotal()} 条数据，共${totalPage}页</span>
+      </div>
+      <div class="pagination-box" data-toggle="pagination" data-total="${pageInfo.getTotal()}" data-page-size="${pageInfo.getPageSize()}" data-page-current="${pageInfo.getPageNum()}">
+      </div>
+  </div>
+  <script>
+    $(function(){
+      <#if !dialog??>
+        var pagerForm = $("#pagerForm", $.CurrentNavtab);
+      <#else>
+        var pagerForm = $("#pagerForm", $.CurrentDialog);
+      </#if>
+      $("<input type='hidden' name='pageCurrent' value='${pageInfo.getPageNum()}' />").appendTo(pagerForm);
+      $("<input type='hidden' name='pageSize' value='${pageInfo.getPageSize()}' />").appendTo(pagerForm);
+      $("<input type='hidden' name='orderField' value='${pageInfo.getOrderBy()}' />").appendTo(pagerForm);
+    
+    });
+  </script>
+</#macro>

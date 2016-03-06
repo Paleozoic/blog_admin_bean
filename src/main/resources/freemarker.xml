@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd">
+        
+	    <bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape" />
+	    <!-- 配置freeMarker静态类引用扩展 -->
+		<bean id="freemarkerStaticModels" class="com.paleo.blog.web.core.mvc.freemarker.FreemarkerStaticModels" factory-method="getInstance" />
+		<!-- 用于处理返回空白视图，在同一个控制器实现返回Json传和视图 -->
+		<bean id="emptyViewResolver" class="com.paleo.blog.tools.mvc.view.EmptyViewResolver">
+			<property name="order" value="1" />
+		</bean>
+	
+    <!-- 配置freeMarker -->
+<!-- 	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"> -->
+		<!-- 将FreeMarkerConfigurer替换为ShiroConfigure，让FreeMarker支持Shiro标签 -->
+		<bean class="com.paleo.blog.shiro.tag.ShiroTagFreeMarkerConfigurer">
+		<!-- freemarker 模板位置 -->
+		<property name="templateLoaderPaths">
+			<array>
+				<value>/WEB-INF/view/</value>
+				<value>/</value>
+			</array>
+		</property>
+		<property name="defaultEncoding" value="utf-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">10</prop>
+				<prop key="locale">zh_CN</prop>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="number_format">#.##</prop>
+				<!-- classic_compatible表示null转为'' -->
+				<prop key="classic_compatible">true</prop>
+				<prop key="auto_import">/_common/main/basic.htm as basic</prop>
+			</props>
+		</property>
+		
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="url_encoding_charset" value="utf-8" />
+				<entry key="xml_escape" value-ref="fmXmlEscape" />
+			</map>
+		</property>
+	</bean>
+</beans>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util 
+	    http://www.springframework.org/schema/util/spring-util.xsd
+	    http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+	    
+    <util:properties id="props" location="
+    	classpath:/properties/jdbc.properties,
+    	classpath:/properties/mybatis.properties,
+    	classpath:/properties/jedis.properties,
+    	classpath:/properties/shiro.properties,
+    	classpath:/properties/geetest.properties" 
+    />
+    
+    <!-- 当proxy-target-class为false时使用JDK动态代理 -->
+	<!-- 为true时使用cglib -->
+	<!-- cglib无法拦截接口方法 -->
+	<aop:aspectj-autoproxy proxy-target-class="false" />
+
+    <!-- 激活Spring注解 -->
+    <context:annotation-config />
+    <!-- 扫描Spring注解包 -->
+	<context:component-scan base-package="
+	com.paleo.blog.service,
+	com.paleo.blog.web,
+	com.paleo.blog.cache.aspect,
+	com.paleo.blog.log.aspect" />
+	
+	<bean id="springContextHolder" class="com.paleo.blog.tools.spring.SpringContextHolder" />
+	
+    <import resource="spring-mvc.xml" /> 
+    <import resource="spring-mybatis.xml" /> 
+    <import resource="../shiro.xml" /> 
+    <import resource="../jedis.xml" /> 
+<!--     <import resource="../cxf.xml" /> -->
+    
+    <!-- 极验验证码 -->
+    <bean id="geetest" class="com.paleo.blog.model.core.GeetestConfig" >
+    	<property name="captcha_id" value="#{props['geetest.captcha_id']}"/>
+    	<property name="private_key" value="#{props['geetest.private_key']}"/>
+    </bean>
+    
+</beans>

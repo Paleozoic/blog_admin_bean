@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:web="http://xmlns.jcp.org/xml/ns/javaee">
+	<display-name>blog_admin</display-name>
+    <!-- DispatcherServlet -->
+	<servlet>
+	   <servlet-name>dispatcher</servlet-name>
+	   <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	   <init-param>
+	      <param-name>contextConfigLocation</param-name>
+	      <param-value>classpath:/spring/spring-basic.xml</param-value>
+	   </init-param>
+	   <load-on-startup>0</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+	   <servlet-name>dispatcher</servlet-name>
+	   <url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<!-- SpringMVC -->
+	<filter>
+	   <filter-name>encodingFilter</filter-name>
+	   <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+	   <init-param>
+	      <param-name>encoding</param-name>
+	      <param-value>UTF-8</param-value>
+	   </init-param>
+	   <init-param>
+	      <param-name>forceEncoding</param-name>
+	      <param-value>true</param-value>
+	   </init-param>
+	</filter>
+	<filter-mapping>
+	   <filter-name>encodingFilter</filter-name>
+	   <url-pattern>/*</url-pattern>
+	   <dispatcher>REQUEST</dispatcher>
+	   <dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+  	<!-- Shiro -->
+	<filter>
+	    <filter-name>shiroFilter</filter-name>
+	    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	    <init-param>
+	        <param-name>targetFilterLifecycle</param-name>
+	        <param-value>true</param-value>
+	    </init-param>
+	</filter>
+	<filter-mapping>
+	    <filter-name>shiroFilter</filter-name>
+	    <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- Druid -->
+	<!-- https://github.com/alibaba/druid/wiki/%E9%85%8D%E7%BD%AE_%E9%85%8D%E7%BD%AEWebStatFilter 和 http://my.oschina.net/u/568779/blog/152813-->
+	<filter>
+	    <filter-name>DruidWebStatFilter</filter-name>
+	    <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
+	    <init-param>
+	        <param-name>exclusions</param-name>
+	        <param-value>*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*</param-value>
+	        <param-name>sessionStatMaxCount</param-name>
+        	<param-value>1000</param-value>
+        	<param-name>sessionStatEnable</param-name>
+        	<param-value>true</param-value>
+        	<param-name>profileEnable</param-name>
+    		<param-value>true</param-value>
+	    </init-param>
+	</filter>
+	<filter-mapping>
+	  <filter-name>DruidWebStatFilter</filter-name>
+	  <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<servlet>
+      <servlet-name>DruidStatView</servlet-name>
+      <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>DruidStatView</servlet-name>
+	    <url-pattern>/druid/*</url-pattern>
+	</servlet-mapping>
+	
+</web-app>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.paleo.blog.service.sys.role_group.dao.IRoleGroupDao">
+		
+	<sql id="role_group_sql">
+		SELECT roleGroup.role_group_id as roleGroupId, roleGroup.upper_role_group_id as upperRoleGroupId, roleGroup.role_group_name as roleGroupName, roleGroup.level, roleGroup.order_no as orderNo, roleGroup.tree,
+		upperRoleGroup.role_group_name as upperRoleGroupName
+		FROM blog_admin.sys_role_group roleGroup 
+		LEFT JOIN blog_admin.sys_role_group upperRoleGroup ON roleGroup.upper_role_group_id = upperRoleGroup.role_group_id
+	</sql>
+	<!-- 获取所有角色组-->
+	<select id="getRoleGroupList" resultType="com.paleo.blog.pojo.sys.role_group.RoleGroup"  >
+		<include refid="role_group_sql"/>
+		WHERE roleGroup.status=1
+		AND roleGroup.tree LIKE '%.${bo.roleGroupId}.%'
+		ORDER BY roleGroup.level,roleGroup.order_no
+	</select>
+	
+	<!-- 获取角色组列表(分页) -->
+	<select id="showRoleGroupPage" resultType="com.paleo.blog.pojo.sys.role_group.RoleGroup"  useCache="false">
+		<include refid="role_group_sql"/>
+		WHERE roleGroup.status=1
+		AND roleGroup.tree LIKE '%.${bo.roleGroupId}.%'
+		<if test="bo.roleGroupName!=null and bo.roleGroupName.length() &gt; 0">
+		    AND roleGroup.role_group_name LIKE '%${bo.roleGroupName}%'
+		</if>
+		ORDER BY roleGroup.tree
+	</select>
+	<!-- 根据roleGroupId获取机构信息 -->
+	<select id="getRoleGroupById" resultType="com.paleo.blog.pojo.sys.role_group.RoleGroup">
+		<include refid="role_group_sql"/>
+		WHERE roleGroup.role_group_id = #{roleGroupId} AND roleGroup.status=1
+	</select>
+	<!-- 获取角色组的下级角色组列表(只包含一级) -->
+	<select id="getChildRoleGroupList" resultType="com.paleo.blog.pojo.sys.role_group.RoleGroup"  >
+		<include refid="role_group_sql"/>
+		WHERE roleGroup.status=1
+		AND roleGroup.upper_role_group_id = #{bo.roleGroupId}
+		ORDER BY roleGroup.level,roleGroup.order_no
+	</select>
+	<!-- 新增角色组 -->
+	<insert id="addRoleGroup"  useGeneratedKeys="true" keyProperty="bo.roleGroupId">
+		INSERT INTO 
+			blog_admin.sys_role_group(role_group_name, upper_role_group_id, order_no, level,tree)
+		VALUES
+			(#{bo.roleGroupName}, #{bo.upperRoleGroupId}, #{bo.orderNo}, #{bo.level}, #{bo.tree})
+	</insert>
+	
+	<!-- 更新角色组 -->
+	<update id="updateRoleGroup">
+		UPDATE blog_admin.sys_role_group 
+		<set>
+			<if test="bo.tree!=null and bo.tree.length() &gt; 0">
+				tree = #{bo.tree},
+			</if>
+			<if test="bo.level!=null">
+				level = #{bo.level},
+			</if>
+			<if test="bo.roleGroupName!=null and bo.roleGroupName.length() &gt; 0">
+				role_group_name = #{bo.roleGroupName},
+			</if>
+			<if test="bo.upperRoleGroupId!=null">
+				upper_role_group_id = #{bo.upperRoleGroupId},
+			</if>
+			<if test="bo.status!=null ">
+				status = #{bo.status},
+			</if>
+			<if test="bo.orderNo!=null">
+				order_no = #{bo.orderNo},
+			</if>
+		</set>
+		WHERE role_group_id = #{bo.roleGroupId}
+	</update>
+	
+	<!-- 更新角色组-->
+	<update id="updateTrees">
+		UPDATE blog_admin.sys_role_group 
+		SET tree = REPLACE(tree,#{oldTree},#{newTree}),
+		level = level+#{levRes} 
+		WHERE tree LIKE '.${oldTree}%'
+	</update>
+	<!-- 删除角色组,逻辑删除 -->
+	<update id="deleteRoleGroupById" >
+		UPDATE  blog_admin.sys_role_group
+		SET status=0
+		WHERE role_group_id = #{roleGroupId}
+	</update>
+</mapper>
+

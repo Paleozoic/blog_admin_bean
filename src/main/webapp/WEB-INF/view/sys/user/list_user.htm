@@ -1,0 +1,57 @@
+<div class="bjui-pageHeader">
+    <form id="pagerForm" data-toggle="ajaxsearch" action="sys/user/list_user?dept.deptId=${RequestParameters['dept.deptId']}" method="post">
+        <input type="hidden" name="user.userId" value="${RequestParameters.userId}">
+        <div class="bjui-searchBar">
+        	<label>部门名：</label>
+            <input type="text" value="${RequestParameters['dept.deptName']}" name="dept.deptName" class="form-control" size="15">
+            <label>用户名：</label>
+            <input type="text" value="${RequestParameters['user.userName']}" name="user.userName" class="form-control" size="15">
+            <label>姓名：</label>
+            <input type="text" value="${RequestParameters['user.realName']}" name="user.realName" class="form-control" size="15">
+            &nbsp;
+            &nbsp;
+            <button type="submit" class="btn-default" data-icon="search" >查询</button>
+            <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
+        </div>
+    </form>
+    <div class="bjui-headBar" style="margin-top:10px;">
+    	<@shiro.hasPermission name="sys.user.add">
+    	<a href="sys/user/add" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="500" data-height="400"  data-mask="true" data-id="add_user_dlg">添加</a>
+	    </@shiro.hasPermission>
+	    &nbsp;
+    </div>
+</div>
+
+<div class="bjui-pageContent tableContent">
+    <table data-toggle="tablefixed" class="table table-bordered"  >
+    	<thead>
+    	<tr>
+    		<th>所属部门</th>
+    		<th>用户名</th>
+    		<th>姓名</th>
+    		<th>操作</th>
+    	</tr>
+    	</thead>
+    	<tbody>
+    	<#list userPage.list as user>
+    	<tr data-id="${user.userId}">
+    		<td>${user.deptName}</td>
+        	<td>${user.userName}</td>
+        	<td>${user.realName}</td>
+    		<td>
+    			<@shiro.hasPermission name="sys.user.authorize">
+    			<a href="sys/user/authorize?user.userId=${user.userId}" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="640" data-height="550"  data-mask="true" data-id="authorize_user_dlg">授权</a>
+    			</@shiro.hasPermission>
+    			<@shiro.hasPermission name="sys.user.edit">
+    			<a href="sys/user/edit?userId=${user.userId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
+    			</@shiro.hasPermission>
+    			<@shiro.hasPermission name="sys.user.delete">
+    			<a href="sys/user/delete?userId=${user.userId}" class="btn btn-red" data-toggle="doajax" data-confirm-msg="确定要删除吗？" data-icon="remove" data-callback="function(){$(this).navtab('refresh');}"></a>
+    			</@shiro.hasPermission>
+    		</td>
+    	</tr>
+    	</#list>
+    	</tbody>
+    </table>
+</div>
+<@basic.pagination pageInfo=userPage />

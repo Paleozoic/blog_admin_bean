@@ -1,0 +1,148 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent tpl-border" style="margin: 2px; padding: 0;">
+    <div style="float:left;margin-right:15px;">
+		<div  style="border-right-width: 0px;border-right-style: solid;" class="tpl-border-color">
+			<ul id="deptTree_${pageId}" class="ztree"></ul>
+		</div>
+    </div>
+    <div id="deptList_${pageId}" style="margin-left:209px; height:100%; overflow:hidden;">
+    </div>
+</div>
+<script>
+	(function(navtab){
+		
+		var setting = {
+		        view: {
+		           addHoverDom: addHoverDom,
+		           removeHoverDom: removeHoverDom,
+		           dblClickExpand: false,
+		           selectedMulti: false
+		        },
+				data: {
+					simpleData: {
+						enable:true,
+						idKey: "deptId",
+						pIdKey: "upperDeptId",
+						rootPId: "0"
+					},
+					key: {
+						name: "deptName"
+					}
+				},
+		      edit: {
+		    		enable: false,
+		    		showRenameBtn:false,
+		    		showRemoveBtn:false
+		    	  },
+		        callback: {
+		          onClick: onClick
+		        }
+			};
+	
+		  //FreeMarker拼接的ztree节点（菜单数据）
+		  var deptArray =[
+			<#list deptList as dept>
+				{
+					'deptId': ${dept.deptId}, 
+					'deptName': '${dept.deptName}',
+					'upperDeptId': ${dept.upperDeptId},
+					'deptLevel': ${dept.level},
+			        'orderNo': ${dept.orderNo},
+			        'tree': '${dept.tree}',
+					'open': true
+				}
+				<#if dept_has_next>,</#if>
+			</#list>];
+		  
+		  /**
+		   * ztree节点点击事件
+		   **/
+		  function onClick(event, treeId, treeNode) {
+		    if(Common.isEmpty(treeNode.deptId)) return;
+		    $(event.target).bjuiajax("doLoad", {loadingmask:false,url:"sys/dept/list_dept",data:{"deptId":treeNode.deptId,"deptTreeId":"deptTree_${pageId}"}, target:"#deptList_${pageId}"});
+		  }
+		  /**
+		   * 鼠标悬停时增加图标和绑定事件
+		   **/
+		  function addHoverDom(treeId, treeNode) {
+		    var aObj = $("#" + treeNode.tId + "_a");
+		    if ($("#addBtn_"+treeNode.deptId, navtab).length>0) return;
+		    var btnStr = "";
+		    <@shiro.hasPermission name="sys.dept.add">
+		    btnStr +=  "<span  class='tree_add' id='addBtn_" + treeNode.deptId+ "' title='添加'></span>"
+		    </@shiro.hasPermission>
+		    <@shiro.hasPermission name="sys.dept.edit">
+		    btnStr +=  "<span  class='tree_edit' id='editBtn_" + treeNode.deptId + "' title='编辑'></span>";
+		    </@shiro.hasPermission>
+		    if(treeNode.level!=0&&!treeNode.isParent){//这里不能使用treeNode.children.length==0，因为初始化的ztre children属性必然为空，初始化后$.fn.zTree.getZTreeObj("deptTree_${pageId}") 得到的ztree才是json的多叉树格式，children不为空
+		    	<@shiro.hasPermission name="sys.dept.delete">
+		    	btnStr +=  "<span class='tree_del' id='delBtn_" + treeNode.deptId + "' title='删除'></span>";
+		    	</@shiro.hasPermission>
+		    } 
+		    
+		    aObj.append(btnStr);
+		    //点击增加btn
+		    $("#addBtn_"+treeNode.deptId, navtab).click(function(){
+		      //弹出窗口新增，提交后台后返回新增成功，ztree添加节点
+		      $(this).dialog({
+		        id:"add_dept_dlg",
+		        title:"新增部门",
+		        type:"POST",
+		        width:500,
+		        height:400,
+		        mask:true,
+		        data:{"upperDeptId":treeNode.deptId,"upperDeptName":treeNode.deptName,"deptTreeId":"deptTree_${pageId}","orderNo":Common.isEmpty(treeNode.children)?1:treeNode.children.length+1},
+		        url:"sys/dept/add"
+		      });
+		    });
+		    //点击编辑btn
+		    $("#editBtn_"+treeNode.deptId, navtab).click(function(){
+		      $(this).dialog({
+		        id:"edit_dept_dlg",
+		        title:"编辑部门",
+		        type:"POST",
+		        width:500,
+		        height:400,
+		        mask:true,
+		        data:{"deptId":treeNode.deptId},
+		        url:"sys/dept/edit"
+		      });
+		    });
+		    //点击删除btn
+		    $("#delBtn_"+treeNode.deptId, navtab).click(function(){
+		      	$(this).bjuiajax('doAjax', {
+		      		confirmMsg:'确认删除['+treeNode.deptName+']吗？',
+		      		url:"sys/dept/delete",
+		      		data:{"deptId":treeNode.deptId},
+		      		callback:function(json){
+		      			$(this).bjuiajax('ajaxDone', json)// 信息提示
+		      			if(json.statusCode==200){
+		      				$(this).navtab('refresh')  // 刷新当前navtab
+		      			}
+		      		}
+		      	});
+		    });
+		  }
+		  /**
+		   * 鼠标悬停的图标和绑定事件移除
+		   **/
+	   	 function removeHoverDom(treeId, treeNode) {
+		    $("#addBtn_"+treeNode.deptId, navtab).unbind().remove();
+		    $("#addBtn_space_" +treeNode.deptId, navtab).unbind().remove();
+		    $("#editBtn_"+treeNode.deptId, navtab).unbind().remove();
+		    $("#editBtn_space_" +treeNode.deptId, navtab).unbind().remove();
+		    $("#delBtn_"+treeNode.deptId, navtab).unbind().remove();
+		    $("#delBtn_space_" +treeNode.deptId, navtab).unbind().remove();
+		  }
+ 
+			var deptTree = $.fn.zTree.init($("#deptTree_${pageId}", navtab), setting, deptArray);
+			var treeObj =  $.fn.zTree.getZTreeObj("deptTree_${pageId}");
+			var nodes = treeObj.getNodes();
+			if (nodes.length>0) {
+			  treeObj.selectNode(nodes[0]);
+			  $(".curSelectedNode",navtab).trigger("click");
+			}
+	
+	})($.CurrentNavtab);
+	
+</script>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+       
+		<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		    <property name="securityManager" ref="securityManager"/>
+		    <property name="loginUrl" value="/core/login"/>
+		    <property name="unauthorizedUrl" value="/core/unauthorized"/>
+		</bean>
+		
+		<!-- 不可以使用/** = user，这样会导致后续的权限设置失效 ,网上说的，未测试-->	
+		<bean id="filterChainDefinitionsService" class="com.paleo.blog.shiro.chain.imp.SimpleFilterChainDefinitionsService">
+			<property name="definitions">
+				<value>
+					/resources/** = anon
+					<!-- 验证码路径 -->
+					/core/start_captcha = anon
+					<!-- web service -->
+					/api/** = anon
+				</value>
+			</property>
+		</bean>
+	
+		<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		    <property name="realm" ref="loginRealm"/>
+		    <!-- By default the servlet container sessions will be used.  Uncomment this line
+         		to use shiro's native sessions (see the JavaDoc for more): -->
+		    <property name="sessionMode" value="native"/>
+		</bean>
+		<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+		
+		<!-- Define the Shiro Realm implementation you want to use to connect to your back-end -->
+		<!-- security datasource: -->
+		<bean id="loginRealm" class="com.paleo.blog.shiro.realm.LoginRealm" />
+		 
+		<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>
+		<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		    <property name="securityManager" ref="securityManager"/>
+		</bean>
+		
+		
+		<!-- 会话管理器 -->
+        <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+            <!-- 3,600,000 milliseconds = 1 hour -->
+            <property name="globalSessionTimeout" value="#{props['shiro.globalSessionTimeout']}"/>
+            <!-- 会话有效校验扫描间隔 -->
+            <property name="sessionValidationInterval" value="#{props['shiro.sessionValidationInterval']}" /> 
+            <!-- 是否开启会话有效校验 --> 
+            <property name="sessionValidationSchedulerEnabled" value="#{props['shiro.sessionValidationSchedulerEnabled']}" /> 
+        </bean>
+
+</beans>

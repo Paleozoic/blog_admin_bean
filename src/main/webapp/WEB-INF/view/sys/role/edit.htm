@@ -1,0 +1,37 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+    <form class="pageForm" action="sys/role/edit"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
+    	<input type="hidden" name="opt" value="update">
+    	<input type="hidden" name="roleId" value="${bo.roleId}">
+        <table class="table table-condensed table-hover">
+            <tbody>
+            	<tr>
+                    <td>
+                        <label for="roleGroupName_${pageId}" class="control-label x90">所属角色组：</label>
+                        <input type="text"  id="roleGroupName_${pageId}" name="roleGroupName"  value="${bo.roleGroupName}"  data-rule="required;length[~100];"  placeholder="请选择角色组" readonly size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="roleName_${pageId}" class="control-label x90">角色名：</label>
+                        <input type="text" id="roleName_${pageId}"  name="roleName" value="${bo.roleName}" data-rule="required;length[~100]" maxlength="100" size="20" >
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button type="submit" class="btn-green">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+	roleGroupSelect.singleSelect(1,$("#roleGroupName_${pageId}",curdlg),function(roleGroupSelected){
+		$("#roleGroupId_${pageId}",curdlg).val(roleGroupSelected.roleGroupId);
+		$("#roleGroupName_${pageId}",curdlg).val(roleGroupSelected.roleGroupName);
+	});
+})($.CurrentDialog);
+</script>

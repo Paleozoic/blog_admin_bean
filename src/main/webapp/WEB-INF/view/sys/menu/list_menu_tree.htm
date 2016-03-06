@@ -1,0 +1,222 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent tpl-border" style="margin: 2px; padding: 0;">
+   <div style="float:left;margin-right:15px;">
+   		<@shiro.hasPermission name="sys.menu.sort">
+	    <button id="sortBtn_${pageId}" class="btn btn-green">保存排序</button>
+	    <div class="alert alert-info form-inline"><i class="fa fa-info-circle"></i> 可拖拽菜单节点</div>
+	    </@shiro.hasPermission>
+	    <div class="alert alert-info form-inline"><input type="checkbox" name="showFunMenu" data-toggle="icheck" data-label="显示功能菜单"></div>
+	    <div autoHeight="6" style="border-right-width: 0px;border-right-style: solid;" class="tpl-border-color">
+	      <ul id="menuTree_${pageId}" class="ztree"></ul>
+	    </div>
+    </div>
+     <div id="funcList_${pageId}" style="margin-left:209px; height:100%; overflow:hidden;"></div>
+</div>
+<script>
+(function(navtab){
+  //ztree设置
+  var setting = {
+      view: {
+    	fontCss:setFontCss, 
+        addHoverDom: addHoverDom,
+        removeHoverDom: removeHoverDom,
+        dblClickExpand: false,
+        selectedMulti: false
+      },
+      data: {
+        simpleData: {
+          enable:true,
+          idKey: "menuId",
+          pIdKey: "upperMenuId",
+          rootPId: "0"
+        },
+        key: {
+          name: "menuName"
+        }
+      },
+      edit: {
+  		enable: true,
+  		showRenameBtn:false,
+  		showRemoveBtn:false
+  	  },
+      callback: {
+        onClick: onClick,
+        onDrop:onDrop,
+        beforeDrop:beforeDrop
+      }
+    };
+
+  //FreeMarker拼接的ztree节点（菜单数据）
+  var menuArray =
+   [
+    <#list menuList as menu>
+      {
+        'menuId': ${menu.menuId}, 
+        'menuCode': '${menu.menuCode}',
+        'menuName': '${menu.menuName}',
+        'type': ${menu.type},
+        <#if menu.type==1>
+        'isHidden':true,
+        </#if>
+        'upperMenuId': ${menu.upperMenuId},
+        'menuLevel': ${menu.level},
+        'orderNo': ${menu.orderNo},
+        'menuUrl': '${menu.url}',
+        'tree': '${menu.tree}',
+        'open': true
+      }
+      <#if menu_has_next>,</#if>
+    </#list>];
+  //初始化ztree
+  $.fn.zTree.init($("#menuTree_${pageId}", navtab), setting, menuArray);
+  var treeObj =  $.fn.zTree.getZTreeObj("menuTree_${pageId}");
+  var nodes = treeObj.getNodes();
+  if (nodes.length>0) {
+  	treeObj.selectNode(nodes[0]);
+  	$(".curSelectedNode",navtab).trigger("click");
+  }
+  /*
+   * 设置字体颜色，主要针对功能菜单
+   */
+  function setFontCss(treeId, treeNode){
+	  if(treeNode.type==1){
+		  return {color:"green"};
+	  }
+  }
+  /**
+   * ztree节点点击事件
+   **/
+  function onClick(event, treeId, treeNode) {
+    if(Common.isEmpty(treeNode.menuId)) return;
+    //点击left menu会出现进度条，而点击ztree节点加载数据也有进度条，造成重复。那么我禁用了ztree点击加载的进度条，先治标不治本。
+    $(event.target).bjuiajax("doLoad", {loadingmask:false,url:"sys/menu/list_menu_children?menuId=" + treeNode.menuId, target:"#funcList_${pageId}"});
+  }
+  /**
+   * 鼠标悬停时增加图标和绑定事件
+   **/
+  function addHoverDom(treeId, treeNode) {
+    var aObj = $("#" + treeNode.tId + "_a");
+    //判断按钮如果存在，则返回。
+    if ($("#addBtn_"+treeNode.menuId, navtab).length>0||$("#editBtn_"+treeNode.menuId, navtab).length>0||$("#delBtn_"+treeNode.menuId, navtab).length>0) return;
+    var btnStr="";
+    if(treeNode.type!=1){//功能菜单不显示增加按钮
+    	<@shiro.hasPermission name="sys.menu.add">
+    	btnStr += "<span  class='tree_add' id='addBtn_" + treeNode.menuId+ "' title='添加'></span>"
+    	</@shiro.hasPermission>
+    }
+    <@shiro.hasPermission name="sys.menu.edit">
+    btnStr += "<span  class='tree_edit' id='editBtn_" + treeNode.menuId + "' title='编辑'></span>";
+    </@shiro.hasPermission>
+    if(treeNode.level!=0){
+      <@shiro.hasPermission name="sys.menu.delete">
+      btnStr +=  "<span class='tree_del' id='delBtn_" + treeNode.menuId + "' title='删除'></span>";
+      </@shiro.hasPermission>
+    } 
+    
+    aObj.append(btnStr);
+    //点击增加btn
+    $("#addBtn_"+treeNode.menuId, navtab).click(function(){
+      treeNode = $.fn.zTree.getZTreeObj("menuTree_${pageId}").getNodeByParam("menuId", treeNode.menuId, null);;//将treeNode从ztree重新取出来，使其拥有children属性
+      $(this).dialog({
+        id:"add_menu_dlg",
+        title:"新增菜单",
+        type:"POST",
+        width:500,
+        height:400,
+        mask:true,
+        data:{"upperMenuId":treeNode.menuId,"upperMenuName":treeNode.menuName,"orderNo":Common.isEmpty(treeNode.children)?1:treeNode.children.length+1},
+        url:"sys/menu/add"
+      });
+    });
+    //点击编辑btn
+    $("#editBtn_"+treeNode.menuId, navtab).click(function(){
+      $(this).dialog({
+        id:"edit_menu_dlg",
+        title:"新增菜单",
+        type:"POST",
+        width:500,
+        height:400,
+        mask:true,
+        data:{"menuId":treeNode.menuId},
+        url:"sys/menu/edit"
+      });
+    });
+    //点击删除btn
+    $("#delBtn_"+treeNode.menuId, navtab).click(function(){
+    	$(this).bjuiajax('doAjax', {
+    		confirmMsg:'确认删除['+treeNode.menuName+']吗？',
+    		url:"sys/menu/delete",
+    		data:{"menuId":treeNode.menuId},
+    		callback:function(json){
+    			$(this).bjuiajax('ajaxDone', json)// 信息提示
+      			if(json.statusCode==200){
+      				$(this).navtab('refresh')  // 刷新当前navtab
+      			}
+    		}
+    	});
+    });
+  }
+  /**
+   * 鼠标悬停的图标和绑定事件移除
+   **/
+  function removeHoverDom(treeId, treeNode) {
+    $("#addBtn_"+treeNode.menuId, navtab).unbind().remove();
+    $("#addBtn_space_" +treeNode.menuId, navtab).unbind().remove();
+    $("#editBtn_"+treeNode.menuId, navtab).unbind().remove();
+    $("#editBtn_space_" +treeNode.menuId, navtab).unbind().remove();
+    $("#delBtn_"+treeNode.menuId, navtab).unbind().remove();
+    $("#delBtn_space_" +treeNode.menuId, navtab).unbind().remove();
+  }
+  /**
+   * 拖拽drop后
+   **/
+  function onDrop(treeId, treeNode) {
+// 	  console.log($.fn.zTree.getZTreeObj("menuTree_${pageId}").getNodes());
+// 	  console.log(JSON.stringify($.fn.zTree.getZTreeObj("menuTree_${pageId}").getNodes()));
+  }
+  /**
+   * 拖拽drop前判断，禁止拖拽成为根菜单
+   **/
+  function beforeDrop(treeId, treeNodes, targetNode, moveType) {
+    //不允许拖到根菜单
+     if (moveType != 'inner' && targetNode.level == 0) {
+      $(this).alertmsg('error', '不允许成为根菜单');
+         return false;
+     }
+    if(moveType == 'inner'  && treeNodes[0].type==1){
+    	$(this).alertmsg('error', '功能菜单不允许跨父菜单拖拽');
+        	return false;
+    }
+  }
+  /**
+   * 保存排序
+   */
+   $("#sortBtn_${pageId}",navtab).click(function(){
+	   $.ajax({
+           type:"POST",
+           url:"sys/menu/sort",
+           data: {"menuTreeJson":JSON.stringify($.fn.zTree.getZTreeObj("menuTree_${pageId}").getNodes())},
+           success:function(msg){
+             $(this).alertmsg('correct',msg);
+           },
+           error:function(data){
+             $(this).alertmsg('error',data.responseText);
+           }
+      	});
+   });
+   /**
+    * 是否显示功能菜单，根据Ztree API showNodes介绍，不兼容exedit扩展，但尝试后没问题。不知是否API没更新。
+    */
+   $("input[name='showFunMenu']",navtab).on('ifChanged', function(event){
+	   	var treeObj =  $.fn.zTree.getZTreeObj("menuTree_${pageId}");
+	   	if($(this).is(':checked')){
+	   		var nodes = treeObj.getNodesByParam("isHidden", true);
+	   		treeObj.showNodes(nodes);//此功能不支持 exedit 扩展，因此不要在编辑状态时使用隐藏节点的方法。
+		}else{
+			var nodes = treeObj.getNodesByParam("type", 1);
+	   		treeObj.hideNodes(nodes);
+		 }
+	 });
+})($.CurrentNavtab);
+  
+</script>

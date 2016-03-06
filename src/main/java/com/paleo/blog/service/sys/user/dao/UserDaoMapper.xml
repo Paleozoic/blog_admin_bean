@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.paleo.blog.service.sys.user.dao.IUserDao">
+		
+  	<sql id="user_sql">
+		SELECT user.user_id as userId,user.user_name as userName,user.dept_id as deptId,user.status,user.real_name as realName,
+		dept.dept_name as deptName
+		FROM blog_admin.sys_user user
+		INNER JOIN blog_admin.sys_dept dept ON dept.dept_id=user.dept_id
+	</sql>
+	
+  	<!-- 获取用户列表(分页) -->
+	<select id="showUserPage" resultType="com.paleo.blog.pojo.sys.user.User"  useCache="false">
+		<include refid="user_sql"/>
+		WHERE user.status=1
+		AND dept.tree LIKE '%.${bo.dept.deptId}.%'
+		<if test="bo.dept.deptName!=null and bo.dept.deptName.length() &gt; 0">
+		    AND dept.dept_name LIKE '%${bo.dept.deptName}%'
+		</if>
+		<if test="bo.user!=null">
+			<if test="bo.user.userName!=null and bo.user.userName.length() &gt; 0">
+			    AND user.user_name LIKE '%${bo.user.userName}%'
+			</if>
+			<if test="bo.user.realName!=null and bo.user.realName.length() &gt; 0">
+			    AND user.real_name LIKE '%${bo.user.realName}%'
+			</if>
+		</if>
+	</select>
+		
+	<!-- 获取用户 by userId -->
+	<select id="getUserById" resultType="com.paleo.blog.pojo.sys.user.User"  >
+		<include refid="user_sql"/>
+		WHERE user.user_id = #{userId} AND user.status=1
+	</select>
+	<!-- 获取某部门的用户（不包含子部门） -->
+	<select id="getUserListInDept" resultType="com.paleo.blog.pojo.sys.user.User"  >
+		<include refid="user_sql"/>
+		WHERE user.dept_id = #{bo.deptId} AND user.status=1
+	</select>	
+	<!-- 新增用户 -->
+	<insert id="addUser"  useGeneratedKeys="true" keyProperty="bo.userId">
+		INSERT INTO 
+			blog_admin.sys_user(user_name, dept_id, real_name, password)
+		VALUES
+			(#{bo.userName}, #{bo.deptId}, #{bo.realName}, #{bo.password})
+	</insert>
+	<!-- 更新用户 -->
+	<update id="updateUser">
+		UPDATE blog_admin.sys_user 
+		<set>
+			<if test="bo.userName!=null and bo.userName.length() &gt; 0">
+				user_name = #{bo.userName},
+			</if>
+			<if test="bo.deptId!=null">
+				dept_id = #{bo.deptId},
+			</if>
+			<if test="bo.realName!=null and bo.realName.length() &gt; 0">
+				real_name = #{bo.realName},
+			</if>
+			<if test="bo.password!=null and bo.password.length() &gt; 0">
+				password = #{bo.password},
+			</if>
+		</set>
+		WHERE user_id = #{bo.userId}
+	</update>
+	
+	<!-- 判断用户是否存在，status不作限制 -->
+	<select id="isUnique" resultType="com.paleo.blog.pojo.sys.user.User"  >
+		<include refid="user_sql"/>
+		WHERE  user.user_name=#{bo.userName}
+	</select>
+	<!-- 删除用户角色（物理删除） -->
+	<delete id="deleteUserRolesByUserId">
+	    DELETE FROM blog_admin.sys_user_roles 
+	    WHERE user_id=#{userId}
+	</delete>
+	<!-- 删除用户（逻辑删除） -->
+	<update id="deleteUserById">
+	    update  blog_admin.sys_user 
+	    SET status=0
+	    WHERE user_id=#{userId}
+	</update>
+	<!-- 增加用户角色 -->
+	<insert id="addUserRoles">
+	    INSERT INTO blog_admin.sys_user_roles(user_id,role_id)VALUES
+	    <foreach collection="bo.roleList" item="role"  separator="," >
+	        (#{bo.user.userId},#{role.roleId})
+	    </foreach>
+	</insert>
+	<!-- 获取用户，by Name-->
+	<select id="getUserByName" resultType="com.paleo.blog.pojo.sys.user.User"  >
+		SELECT user.user_id as userId,user.user_name as userName,user.dept_id as deptId,user.status,user.real_name as realName,user.password,
+		dept.dept_name as deptName
+		FROM blog_admin.sys_user user
+		LEFT JOIN blog_admin.sys_dept dept ON dept.dept_id=user.dept_id
+		WHERE  user.user_name=#{userName}
+		AND user.status=1
+	</select>
+</mapper>
+

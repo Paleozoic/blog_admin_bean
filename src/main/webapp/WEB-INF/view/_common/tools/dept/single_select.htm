@@ -1,0 +1,65 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+        <div layoutH="30" style="float:left; overflow:auto; width:230px; line-height:21px; border-right: 1px solid #B8D0D6;">
+		<div class="panelBar">
+			已选择：<span style="color: red;font-weight: bold;" name="deptName">${dept.deptName}</span>
+		</div>
+		<input type="hidden" name="deptId" value="${dept.deptId}"/>
+		<ul id="deptTree_${pageId}" class="ztree"></ul>
+	</div>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close" >关闭</button></li>
+        <li><button type="button" class="btn-green" >保存</button></li>
+        <li><button type="button" class="btn-blue" >清空</button></li>
+    </ul>
+</div>
+<script>
+(function(dlg){
+	var setting = {
+	        view: {
+	           dblClickExpand: false
+	        },
+			data: {
+				simpleData: {
+					enable:true,
+					idKey: "deptId",
+					pIdKey: "upperDeptId",
+					rootPId: "0"
+				},
+				key: {
+					name: "deptName"
+				}
+			},
+	      edit: {
+	    		enable: true,
+	    		showRenameBtn:false,
+	    		showRemoveBtn:false
+	    	  },
+	        callback: {
+	          onClick: onClick
+	        }
+		};
+
+	  function onClick(event, treeId, treeNode){
+		  $("input[name='deptId']",dlg).val(treeNode.deptId);
+		  $("span[name='deptName']",dlg).html(treeNode.deptName);
+	  }
+	  //FreeMarker拼接的ztree节点（菜单数据）
+	  var deptArray =[
+		<#list deptList as dept>
+			{
+				'deptId': ${dept.deptId}, 
+				'deptName': '${dept.deptName}',
+				'upperDeptId': ${dept.upperDeptId},
+				'deptLevel': ${dept.level},
+		        'orderNo': ${dept.orderNo},
+		        'tree': '${dept.tree}',
+				'open': true
+			}
+			<#if dept_has_next>,</#if>
+		</#list>];
+	  var deptTree = $.fn.zTree.init($("#deptTree_${pageId}", dlg), setting, deptArray);
+})($.CurrentDialog);
+</script>

@@ -1,0 +1,40 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+    <form id="deptForm" class="pageForm" action="sys/dept/edit"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
+    	<input type="hidden" name="opt" value="update">
+    	<input type="hidden" name="deptId" value="${bo.deptId}"/>
+    	<input type="hidden" id="upperDeptId_${pageId}" name="upperDeptId" value="${bo.upperDeptId}"/>
+    	<input type="hidden" name="orderNo" value="${bo.orderNo}"/>
+        <table class="table table-condensed table-hover">
+            <tbody>
+                <tr>
+                    <td>
+                        <label for="upperDeptName_${pageId}" class="control-label x90">上级部门：</label>
+                        <input type="text" id="upperDeptName_${pageId}" name="upperDeptName" value="${bo.upperDeptName}" data-rule="required;length[~100]" placeholder="请选择上级部门" readonly size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="deptName_${pageId}" class="control-label x90">部门名：</label>
+                        <input type="text" id="deptName_${pageId}"  name="deptName"  value="${bo.deptName}" data-rule="required;length[~100]" maxlength="100" size="20" >
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button type="submit" class="btn-green">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+	deptSelect.singleSelect(1,$("#upperDeptName_${pageId}",curdlg),function(deptSelected){
+		$("#upperDeptId_${pageId}",curdlg).val(deptSelected.deptId);
+		$("#upperDeptName_${pageId}",curdlg).val(deptSelected.deptName);
+	});
+})($.CurrentDialog);
+
+</script>

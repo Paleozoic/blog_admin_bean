@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+	    http://www.springframework.org/schema/tx/spring-tx.xsd" >
+    <!-- 定义了dataSource -->
+    <import resource="classpath:druid.xml" />
+    <!-- 事务管理  -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	 <!-- 通过注解控制事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager"  proxy-target-class="true" />
+    
+    <!-- PS:depends-on="jedisResource"这个很重要啊！很重要啊！害我浪费好多时间啊！ -->
+    <!-- 系统启动，Spring初始化，MyBatis的缓存依赖于Redis，所以要先加载。否则会导致Spring初始化MyBatis的缓存的时候，进行Redis的操作报错。空指针。（已取消MyBatis的二级缓存，去掉depends-on="jedisResource"） -->
+    <bean id="mybatis.sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" >  
+      <property name="dataSource" ref= "dataSource" /> 
+      <!-- 扫描Mapper.xml位置 --> 
+      <property name="mapperLocations" value="classpath:com/paleo/blog/service/**/*DaoMapper.xml" />  
+      <property name="configLocation"  value="classpath:mybatis.xml" />
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	    <!-- 扫描dao位置 -->
+		<property name="basePackage" value="com.paleo.blog.service.**.dao"  />
+		<property name="sqlSessionFactory" ref="mybatis.sessionFactory" />
+	</bean>
+	
+</beans>

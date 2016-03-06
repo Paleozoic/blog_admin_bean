@@ -1,0 +1,65 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent">
+        <div layoutH="30" style="float:left; overflow:auto; width:230px; line-height:21px; border-right: 1px solid #B8D0D6;">
+		<div class="panelBar">
+			已选择：<span style="color: red;font-weight: bold;" name="roleGroupName">${roleGroup.roleGroupName}</span>
+		</div>
+		<input type="hidden" name="roleGroupId" value="${roleGroup.roleGroupId}"/>
+		<ul id="roleGroupTree_${pageId}" class="ztree"></ul>
+	</div>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close" >关闭</button></li>
+        <li><button type="button" class="btn-green" >保存</button></li>
+        <li><button type="button" class="btn-blue" >清空</button></li>
+    </ul>
+</div>
+<script>
+(function(dlg){
+	var setting = {
+	        view: {
+	           dblClickExpand: false
+	        },
+			data: {
+				simpleData: {
+					enable:true,
+					idKey: "roleGroupId",
+					pIdKey: "upperRoleGroupId",
+					rootPId: "0"
+				},
+				key: {
+					name: "roleGroupName"
+				}
+			},
+	      edit: {
+	    		enable: true,
+	    		showRenameBtn:false,
+	    		showRemoveBtn:false
+	    	  },
+	        callback: {
+	          onClick: onClick
+	        }
+		};
+
+	  function onClick(event, treeId, treeNode){
+		  $("input[name='roleGroupId']",dlg).val(treeNode.roleGroupId);
+		  $("span[name='roleGroupName']",dlg).html(treeNode.roleGroupName);
+	  }
+	  //FreeMarker拼接的ztree节点（菜单数据）
+	  var roleGroupArray =[
+		<#list roleGroupList as roleGroup>
+			{
+				'roleGroupId': ${roleGroup.roleGroupId}, 
+				'roleGroupName': '${roleGroup.roleGroupName}',
+				'upperRoleGroupId': ${roleGroup.upperRoleGroupId},
+				'roleGroupLevel': ${roleGroup.level},
+		        'orderNo': ${roleGroup.orderNo},
+		        'tree': '${roleGroup.tree}',
+				'open': true
+			}
+			<#if roleGroup_has_next>,</#if>
+		</#list>];
+	  var roleGroupTree = $.fn.zTree.init($("#roleGroupTree_${pageId}", dlg), setting, roleGroupArray);
+})($.CurrentDialog);
+</script>

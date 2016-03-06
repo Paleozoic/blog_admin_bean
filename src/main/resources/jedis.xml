@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	<bean id="jedisPoolConfig"  class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal" value="#{props['jedis.maxTotal']}"/>
+		<property name="maxIdle" value="#{props['jedis.maxIdle']}"/>
+		<property name="minIdle" value="#{props['jedis.minIdle']}"/>
+		<property name="maxWaitMillis" value="#{props['jedis.maxWaitMillis']}"/>
+		<property name="testOnBorrow" value="#{props['jedis.testOnBorrow']}" />
+		<property name="testOnReturn" value="#{props['jedis.testOnReturn']}"/>
+		<property name="testWhileIdle" value="#{props['jedis.testWhileIdle']}" />
+	</bean>
+		
+	<!-- redis的连接池pool，不是必选项：timeout/password  -->
+    <bean id = "jedisPool" class="redis.clients.jedis.JedisPool" >
+      <constructor-arg index="0" ref="jedisPoolConfig"/>
+      <constructor-arg index="1" value="#{props['redis.host']}"/>
+      <constructor-arg index="2" value="#{props['redis.port']}" type="int"/>
+      <constructor-arg index="3" value="#{props['redis.timeout']}" type="int"/>
+      <constructor-arg index="4" value="#{props['redis.password']}"/>
+      <constructor-arg index="5" value="#{props['redis.database.cache']}" type="int"/>
+    </bean>
+    
+	<bean id="cacheManager" class="com.paleo.blog.cache.redis.RedisCacheManager">
+		<property name="jedisPool" ref="jedisPool" />
+	</bean>
+	
+	<bean id="jedisTemplate" class="com.paleo.blog.cache.redis.utils.JedisTemplate">
+		<property name="jedisPool" ref="jedisPool" />
+	</bean>
+	
+	<bean id="CacheAspectJ" class="com.paleo.blog.cache.aspectj.CacheAspectJ" >
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<aop:config>
+	  <aop:aspect ref="CacheAspectJ">
+	    <aop:pointcut id="iSerivcePointCut" expression="execution(public * com.paleo.blog.remote..*(..))" />
+	    <aop:around pointcut-ref="iSerivcePointCut" method="around" />
+	  </aop:aspect>
+	</aop:config>
+    
+</beans>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>blog_admin by Paleo</title>
+
+<!-- <link rel="shortcut icon" href="../resources/images/github/logo.png" type="image/x-icon" /> -->
+<script src="../resources/BJUI/js/jquery-2.1.4.js"></script>
+<script src="../resources/js/particles.js" type="text/javascript"></script>
+<#-- 极验验证码 -->
+<script src="http://static.geetest.com/static/tools/gt.js"></script>
+<style type="text/css">
+body{
+	overflow:hidden;
+	background-color: #2472b4;
+	position:realtive
+}
+.index-main{
+   position: absolute; top:50%; left:50%; margin-top:-260px; margin-left: -180px; padding: 30px; width:300px; height:350px;
+   background: #FAFAFA; background: rgba(255,255,255,0.5); border: 1px #DDD solid;
+   border-radius: 5px;
+   -webkit-box-shadow: 1px 5px 8px #888888; -moz-box-shadow: 1px 5px 8px #888888; box-shadow: 1px 5px 8px #888888;
+}
+.input-wrapper{margin-top:18px;text-align: center;}
+.input-wrapper input{margin:0;padding:8px 10px;width:260px;background:#e7f1f8;font-size:19px;color:#555;border:1px solid #1672B9;border-radius:5px;box-shadow:inset 0 1px 2px rgba(15,82,135,.25),0 1px 0 rgba(255,255,255,.15)}
+#captcha{margin:0 auto;}
+.sign-button{display:block;padding:0;width:100%;font-size:15px;line-height:33px;color:#fff;text-align:center;text-shadow:0 1px 1px rgba(0,0,0,.2);background:#80c3f7;background:-webkit-linear-gradient(top,#80c3f7,#6bbaf8);background:linear-gradient(to bottom,#80c3f7,#6bbaf8);border:1px solid #1D80CF;border-radius:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 1px rgba(50,50,50,.05);outline:0;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0)}
+.submit{width:100%;padding:10px 0}
+.signin-misc-wrapper{margin-top:18px;}
+.remember-me{float:left}
+.unable-login{float:right;padding-bottom:25px;}
+.clearfix{*zoom:1}
+.clearfix:before,.clearfix:after{display:table;content:""}.clearfix:after{clear:both}.hide-text{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0}
+.login_logo {margin-bottom: 25px; height: 75px; text-align: center;}
+.login_logo img {height: 75px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	var handler = function (captchaObj) {
+         // 将验证码加到id为captcha的元素里
+         captchaObj.appendTo("#captcha");
+     };
+    $.ajax({
+        // 获取id，challenge，success（是否启用failback）
+        url: "../core/start_captcha",
+        type: "get",
+        dataType: "json", // 使用jsonp格式
+        success: function (data) {
+            // 使用initGeetest接口
+            // 参数1：配置参数，与创建Geetest实例时接受的参数一致
+            // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
+            initGeetest({
+                gt: data.gt,
+                challenge: data.challenge,
+                product: "float", // 产品形式
+                offline: !data.success
+            }, handler);
+        }
+    });
+    
+    <#-- 查看了知乎登录页源码 -->
+	/* ---- particles.js config ---- */
+	particlesJS("particles-js", {
+	    particles: {
+	        number: {
+	            value: 20,
+	            density: {
+	                enable: !0,
+	                value_area: 1E3
+	            }
+	        },
+	        color: {
+	            value: "#e1e1e1"
+	        },
+	        shape: {
+	            type: "circle",
+	            stroke: {
+	                width: 0,
+	                color: "#000000"
+	            },
+	            polygon: {
+	                nb_sides: 5
+	            },
+	            image: {
+	                src: "img/github.svg",
+	                width: 100,
+	                height: 100
+	            }
+	        },
+	        opacity: {
+	            value: .5,
+	            random: !1,
+	            anim: {
+	                enable: !1,
+	                speed: 1,
+	                opacity_min: .1,
+	                sync: !1
+	            }
+	        },
+	        size: {
+	            value: 15,
+	            random: !0,
+	            anim: {
+	                enable: !1,
+	                speed: 180,
+	                size_min: .1,
+	                sync: !1
+	            }
+	        },
+	        line_linked: {
+	            enable: !0,
+	            distance: 650,
+	            color: "#cfcfcf",
+	            opacity: .26,
+	            width: 1
+	        },
+	        move: {
+	            enable: !0,
+	            speed: 2,
+	            direction: "none",
+	            random: !0,
+	            straight: !1,
+	            out_mode: "out",
+	            bounce: !1,
+	            attract: {
+	                enable: !1,
+	                rotateX: 600,
+	                rotateY: 1200
+	            }
+	        }
+	    },
+	    interactivity: {
+	        detect_on: "canvas",
+	        events: {
+	            onhover: {
+	                enable: !1,
+	                mode: "repulse"
+	            },
+	            onclick: {
+	                enable: 1,
+	                mode: "push"
+	            },
+	            resize: !0
+	        },
+	        modes: {
+	            grab: {
+	                distance: 400,
+	                line_linked: {
+	                    opacity: 1
+	                }
+	            },
+	            bubble: {
+	                distance: 400,
+	                size: 40,
+	                duration: 2,
+	                opacity: 8,
+	                speed: 3
+	            },
+	            repulse: {
+	                distance: 200,
+	                duration: .4
+	            },
+	            push: {
+	                particles_nb: 4
+	            },
+	            remove: {
+	                particles_nb: 2
+	            }
+	        }
+	    },
+	    retina_detect: !0
+	});
+	$("#loginBtn").click(function(){
+		$.ajax({
+			url:"../core/login",
+			data:$("#loginForm").serialize(),
+			dataType:"text",
+			error:function(data){
+				alert("error:"+data.responseText);
+			},
+			success:function(){
+				window.location="";
+			}
+		});
+	});
+	$(".unable-login").click(function(){
+		alert("用户名：admin \n密   码：123 \nMy QQ is qxl4work@163.com \nSometimes maybe the geetest captcha server is down. ");
+	});
+});
+</script>
+</head>
+<body>
+		<div class="index-main">
+				<div class="login_logo">
+		            <img src="../resources/images/github/logo.png" >
+		        </div>
+				<div >
+					<form id="loginForm"  autocomplete="off">
+						<input type="hidden" name="opt" value="login">
+						<div>
+							<div class="input-wrapper">
+								<input required value="admin" type="text" name="userName" aria-label="用户名" placeholder="用户名">
+							</div>
+							<div class="input-wrapper">
+								<input required value="123" type="password" name="password" aria-label="密码" placeholder="密码">
+							</div>
+							<div class="input-wrapper">
+								<div id="captcha"></div>
+							</div>
+						</div>
+						<div class="input-wrapper">
+							<button id="loginBtn" class="sign-button submit" type="button">登录</button>
+						</div>
+						<div class="signin-misc-wrapper clearfix">
+							<label class="remember-me">
+							<input type="checkbox" name="rememberMe" checked="" value="true"> 记住我
+							</label>
+							<a class="unable-login" href="#">无法登录?</a>
+						</div>
+					</form>
+				</div>
+		</div>
+		<div id="particles-js" ></div>
+</body>
+</html>

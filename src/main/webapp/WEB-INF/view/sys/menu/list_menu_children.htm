@@ -1,0 +1,47 @@
+<div class="bjui-pageHeader">
+    <form id="pagerForm" data-toggle="ajaxsearch" action="sys/menu/list_menu_children?menuId=${RequestParameters.menuId}" method="post"><#-- 这个menuId是功能菜单的父级ID -->
+        <div class="bjui-searchBar">
+            <label>菜单名：</label>
+            <input type="text" value="${RequestParameters.menuName}" name="menuName" class="form-control" size="15">
+            <label>标识码：</label>
+            <input type="text" value="${RequestParameters.menuCode}" name="menuCode" class="form-control" size="15">
+            &nbsp;
+            &nbsp;
+            <button type="submit" class="btn-default" data-icon="search" >查询</button>
+            <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
+        </div>
+    </form>
+</div>
+
+<div class="bjui-pageContent tableContent">
+    <table data-toggle="tablefixed" class="table table-bordered"  >
+      <thead>
+      <tr>
+        <th>功能名</th>
+        <th>唯一标识码</th>
+        <th>URL</th>
+        <th>菜单类型</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <#list cmenuPage.list as cmenu>
+      <tr data-id="${cmenu.menuId}">
+          <td>${cmenu.menuName}</td>
+          <td>${cmenu.menuCode}</td>
+          <td>${cmenu.url}</td>
+          <td><@basic.menuType type=cmenu.type /></td>
+	      <td>
+	       	 <@shiro.hasPermission name="sys.menu.edit">
+	         <a href="sys/menu/edit?menuId=${cmenu.menuId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
+	         </@shiro.hasPermission>
+	         <@shiro.hasPermission name="sys.menu.delete">
+	         <a href="sys/menu/delete?menuId=${cmenu.menuId}" class="btn btn-red" data-toggle="doajax" data-confirm-msg="确定要删除吗？" data-icon="remove" data-callback="cmenution(){$(this).navtab('refresh');}"></a>
+	       	 </@shiro.hasPermission>
+	       </td>
+      </tr>
+      </#list>
+      </tbody>
+    </table>
+</div>
+<@basic.pagination pageInfo=cmenuPage />

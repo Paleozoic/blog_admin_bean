@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.paleo.blog.service.sys.account.dao.IAccountDao">
+		
+    <resultMap id="user" type="com.paleo.blog.model.sys.account.bo.User">  
+		    <id property="userId" column="userId"/>  
+		    <result property="userName" column="userName"/>  
+		    <result property="deptId" column="deptId"/> 
+		    <result property="realName" column="realName"/>
+		    <result property="status" column="userStatus"/>
+		    <result property="password" column="password"/> 
+    	</resultMap>  
+    	<resultMap id="dept" type="com.paleo.blog.model.sys.account.bo.Dept">  
+		    <id property="deptId" column="deptId"/>  
+	  	    <result property="deptName" column="deptName"/>
+		    <result property="upperDeptId" column="upperDeptId"/>  
+		    <result property="upperDeptName" column="upperDeptName"/> 
+		    <result property="level" column="deptLevel"/>
+		    <result property="orderNo" column="deptOrderNo"/> 
+		    <result property="tree" column="deptTree"/>
+		    <result property="status" column="deptStatus"/>
+    	</resultMap> 
+    	<resultMap id="menu" type="com.paleo.blog.model.sys.account.bo.Menu">  
+		    <id property="menuId" column="menuId"/>  
+		    <result property="menuCode" column="menuCode"/>
+	  	    <result property="menuName" column="menuName"/>
+		    <result property="upperMenuId" column="upperMenuId"/>  
+		    <result property="upperMenuName" column="upperMenuName"/> 
+		    <result property="type" column="menuType"/>
+		    <result property="level" column="menuLevel"/> 
+		    <result property="orderNo" column="menuOrderNo"/>
+		    <result property="url" column="url"/>
+		    <result property="tree" column="menuTree"/>
+		    <result property="status" column="menuStatus"/> 
+    	</resultMap>
+    	<resultMap id="role" type="com.paleo.blog.model.sys.account.bo.Role">  
+		    <id property="roleId" column="roleId"/>  
+		    <result property="roleName" column="roleName"/> 
+		    <result property="roleGroupId" column="roleGroupId"/>
+		    <result property="roleGroupName" column="roleGroupName"/> 
+		    <result property="status" column="status"/>
+		    <result property="isManaged" column="isManaged"/>
+    	</resultMap>
+    	<resultMap id="account" type="com.paleo.blog.model.sys.account.Account">  
+		    <association property="user" resultMap="user"/> 
+		    <association property="dept" resultMap="dept"/>
+		    <collection property="menuList" resultMap="menu" ofType="com.paleo.blog.model.sys.account.bo.Menu"/>
+		    <collection property="roleList" resultMap="role" ofType="com.paleo.blog.model.sys.account.bo.Role"/>
+    	</resultMap> 
+    	
+    	<select id="getAccount" resultMap="account">
+	  	    SELECT  
+	  	    user.user_id AS userId,user.user_name AS userName,user.dept_id AS deptId,user.real_name AS realName,user.status AS userStatus,user.password AS PASSWORD,
+	  	    dept.dept_name AS deptName,dept.upper_dept_id AS upperDeptId,upperDept.dept_name AS upperDeptName,dept.level AS deptLevel,dept.order_no AS deptOrderNo,dept.tree AS deptTree,dept.status AS deptStatus,
+	  	    menu.menu_id AS menuId,menu.menu_code AS menuCode,menu.menu_name AS menuName,menu.upper_menu_id AS upperMenuId,upperMenu.menu_name AS upperMenuName,menu.type AS menuType,menu.level AS menuLevel,menu.order_no AS menuOrderNo,menu.url AS url,menu.tree AS menuTree,menu.status AS menuStatus,
+	  	    role.role_id AS roleId,role.role_name AS roleName,role.status AS roleStatus,
+	  	    uroles.is_managed as isManaged,
+	  	    roleGroup.role_group_id as roleGroupId,roleGroup.role_group_name as roleGroupName
+	  	    FROM blog_admin.sys_user user
+	  	    INNER JOIN blog_admin.sys_dept dept ON user.dept_id = dept.dept_id
+	  	    LEFT JOIN blog_admin.sys_dept upperDept ON dept.upper_dept_id = upperDept.dept_id
+	  	    LEFT JOIN blog_admin.sys_user_roles uroles ON uroles.user_id = user.user_id
+	  	    LEFT JOIN blog_admin.sys_role role ON uroles.role_id = role.role_id 
+	  	    LEFT JOIN blog_admin.sys_role_group roleGroup ON role.role_group_id = roleGroup.role_group_id
+	  	    LEFT JOIN blog_admin.sys_role_menus rmenus ON rmenus.role_id = role.role_id AND role.status=1
+	  	    LEFT JOIN blog_admin.sys_menu menu ON menu.menu_id = rmenus.menu_id 
+	  	    LEFT JOIN blog_admin.sys_menu upperMenu ON menu.upper_menu_id = upperMenu.menu_id 
+	  	    WHERE  user.user_id= #{userId} 
+	  	    GROUP BY menu.menu_id
+	  	    ORDER BY menu.level,menu.order_no
+	  	</select>
+</mapper>
+

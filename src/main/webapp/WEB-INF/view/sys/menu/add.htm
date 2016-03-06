@@ -1,0 +1,53 @@
+<div class="bjui-pageContent">
+    <form class="pageForm" action="sys/menu/add"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
+    	<input type="hidden" name="opt" value="add">
+    	<input type="hidden" name="upperMenuId" value="${bo.upperMenuId}"/>
+    	<input type="hidden" name="orderNo" value="${bo.orderNo}"/>
+        <table class="table table-condensed table-hover">
+            <tbody>
+                <tr>
+                    <td>
+                        <label for="upperMenuName" class="control-label x90">上级菜单：</label>
+                        <input type="text" id="upperMenuName" value="${bo.upperMenuName}" readonly size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="menuName" class="control-label x90">菜单名：</label>
+                        <input type="text" name="menuName" id="menuName"  data-rule="required;length[~100];" maxlength="100" size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <label for="menuCode" class="control-label x90">唯一标识码：</label>
+                        <input type="text" name="menuCode" id="menuCode"  data-rule="required;length[~50];remote[sys/menu/is_unique]" maxlength="50" size="20" >
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="url" class="control-label x90">URL：</label>
+                        <input type="text" name="url" id="url"  data-rule="length[~100];" maxlength="100" size="20" >
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                		<label for="type" class="control-label x90">菜单类型：</label>
+                		<input type="radio" name="type"  value="0" data-toggle="icheck" data-label="目录菜单" checked>
+                		<input type="radio" name="type"  value="1" data-toggle="icheck" data-label="功能菜单">
+                	</td>
+               </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close">关闭</button></li>
+        <li><button type="submit" class="btn-default">保存</button></li>
+    </ul>
+</div>
+<script>
+(function(curdlg){
+	
+})($.CurrentDialog);
+</script>

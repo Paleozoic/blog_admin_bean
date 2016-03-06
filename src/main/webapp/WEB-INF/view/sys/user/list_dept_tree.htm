@@ -1,0 +1,103 @@
+<#assign pageId = UUIDUtils.getUUID() >
+<div class="bjui-pageContent tpl-border" style="margin: 2px; padding: 0;">
+    <div style="float:left;margin-right:15px;">
+		<div  style="border-right-width: 0px;border-right-style: solid;" class="tpl-border-color">
+			<ul id="deptTree_${pageId}" class="ztree"></ul>
+		</div>
+    </div>
+    <div id="userList_${pageId}" style="margin-left:209px; height:100%; overflow:hidden;">
+    </div>
+</div>
+<script>
+	(function(navtab){
+		
+		var setting = {
+		        view: {
+		           addHoverDom: addHoverDom,
+			       removeHoverDom: removeHoverDom,
+		           dblClickExpand: false,
+		           selectedMulti: false
+		        },
+				data: {
+					simpleData: {
+						enable:true,
+						idKey: "deptId",
+						pIdKey: "upperDeptId",
+						rootPId: "0"
+					},
+					key: {
+						name: "deptName"
+					}
+				},
+		        callback: {
+		          onClick: onClick
+		        }
+			};
+	
+		  //FreeMarker拼接的ztree节点（菜单数据）
+		  var deptArray =[
+			<#list deptList as dept>
+				{
+					'deptId': ${dept.deptId}, 
+					'deptName': '${dept.deptName}',
+					'upperDeptId': ${dept.upperDeptId},
+					'deptLevel': ${dept.level},
+			        'orderNo': ${dept.orderNo},
+			        'tree': '${dept.tree}',
+					'open': true
+				}
+				<#if dept_has_next>,</#if>
+			</#list>];
+		  
+		  /**
+		   * ztree节点点击事件
+		   **/
+		  function onClick(event, treeId, treeNode) {
+		    if(Common.isEmpty(treeNode.deptId)) return;
+		    $(event.target).bjuiajax("doLoad", {loadingmask:false,url:"sys/user/list_user",data:{"dept.deptId":treeNode.deptId},target:"#userList_${pageId}"});
+		  }
+		  /**
+		   * 鼠标悬停时增加图标和绑定事件
+		   **/
+		  function addHoverDom(treeId, treeNode) {
+		    var aObj = $("#" + treeNode.tId + "_a");
+		    if ($("#addBtn_"+treeNode.deptId, navtab).length>0) return;
+		    var btnStr ="";
+		    <@shiro.hasPermission name="sys.user.add">
+		    btnStr +=  "<span  class='tree_add' id='addBtn_" + treeNode.deptId+ "' title='添加'></span>";
+		    </@shiro.hasPermission>
+		    aObj.append(btnStr);
+		    //点击增加btn
+		    $("#addBtn_"+treeNode.deptId, navtab).click(function(){
+		      //弹出窗口新增，提交后台后返回新增成功，ztree添加节点
+		      $(this).dialog({
+		        id:"add_user_dlg",
+		        title:"新增部门",
+		        type:"POST",
+		        width:500,
+		        height:400,
+		        mask:true,
+		        data:{"deptId":treeNode.deptId,"deptName":treeNode.deptName},
+		        url:"sys/user/add"
+		      });
+		    });
+		  }
+		  /**
+		   * 鼠标悬停的图标和绑定事件移除
+		   **/
+	   	 function removeHoverDom(treeId, treeNode) {
+		    $("#addBtn_"+treeNode.deptId, navtab).unbind().remove();
+		    $("#addBtn_space_" +treeNode.deptId, navtab).unbind().remove();
+		  }
+		  
+			var deptTree = $.fn.zTree.init($("#deptTree_${pageId}", navtab), setting, deptArray);
+			var treeObj =  $.fn.zTree.getZTreeObj("deptTree_${pageId}");
+			var nodes = treeObj.getNodes();
+			if (nodes.length>0) {
+			  treeObj.selectNode(nodes[0]);
+	  		  $(".curSelectedNode",navtab).trigger("click");
+			}
+	
+	})($.CurrentNavtab);
+	
+</script>
