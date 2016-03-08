@@ -22,7 +22,6 @@ import com.paleo.blog.remote.sys.role.IRoleService;
 import com.paleo.blog.remote.sys.user.IUserService;
 import com.paleo.blog.tools.encrypt.MD5Utils;
 import com.paleo.blog.tools.mvc.ctrl.MSG;
-import com.paleo.blog.tools.mvc.ctrl.OPT;
 import com.paleo.blog.tools.mvc.page.PageUtils;
 import com.paleo.blog.tools.mvc.view.EmptyViewResolver;
 import com.paleo.blog.web.core.BaseController;
@@ -55,62 +54,62 @@ public class UserController extends BaseController{
 		return "sys/user/list_user";
 	}
 	
-	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
-	public String add(User bo,ModelMap rps){
-		if(IsOPT(OPT.ADD)){
-			//更新到数据库
-			try{
-				bo.setPassword(MD5Utils.customMD5(bo.getPassword()));
-				userService.addUser(bo);
-				BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
-		}
-		//返回视图
+	@RequestMapping(value = "add_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add_view(User bo,ModelMap rps){
 		rps.addAttribute("bo",bo);
 		return "sys/user/add";
 	}
 	
-	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
-	public String edit(User bo,ModelMap rps){
-		if(IsOPT(OPT.UPDATE)){
-			//更新到数据库
-			try{
-				userService.updateUser(bo);
-				BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
+	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add(User bo,ModelMap rps){
+		try{
+			bo.setPassword(MD5Utils.customMD5(bo.getPassword()));
+			userService.addUser(bo);
+			BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
 		}
-		//返回视图
+		return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
+	}
+	
+	@RequestMapping(value = "edit_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit_view(User bo,ModelMap rps){
 		rps.addAttribute("bo",userService.getUserById(bo.getUserId()));
 		return "sys/user/edit";
 	}
 	
-	@RequestMapping(value = "authorize", method = { RequestMethod.POST, RequestMethod.GET })
-	public String authorize(UserRoles bo,ModelMap rps){
-		if(IsOPT(OPT.AUTHORIZE)){
-			//更新到数据库
-			try{
-				userService.authorizeUser(bo);
-				BjuiView.success(MSG.AUTHRIZE_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.AUTHRIZE_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
+	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit(User bo,ModelMap rps){
+		try{
+			userService.updateUser(bo);
+			BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
 		}
-		//返回视图
+		return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
+	}
+	
+	@RequestMapping(value = "authorize_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String authorize_view(UserRoles bo,ModelMap rps){
 		List<Role> roleList =  roleService.getRoleList(AccountUtils.getUserId());//登陆用户可分配的角色
 		List<Role> userRoleList =  roleService.getUserRoleList(bo.getUser().getUserId());//授权用户已授权的角色
 		rps.put("selectedRoleList",com.paleo.blog.model.sys.role.Role.buildSelectedRoles(roleList,userRoleList));
 		rps.put("user", userService.getUserById(bo.getUser().getUserId()));
 		return "sys/user/authorize";
+	}
+	
+	@RequestMapping(value = "authorize", method = { RequestMethod.POST, RequestMethod.GET })
+	public String authorize(UserRoles bo,ModelMap rps){
+		try{
+			userService.authorizeUser(bo);
+			BjuiView.success(MSG.AUTHRIZE_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.AUTHRIZE_FAIL.getMsg(),false);
+		}
+		return EmptyViewResolver.EMPTY_VIEW;
 	}
 	
 	@RequestMapping(value = "delete",  method = { RequestMethod.POST, RequestMethod.GET })

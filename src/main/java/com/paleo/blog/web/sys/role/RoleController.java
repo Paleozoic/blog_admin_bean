@@ -20,7 +20,6 @@ import com.paleo.blog.remote.sys.role.IRoleService;
 import com.paleo.blog.remote.sys.role_group.IRoleGroupService;
 import com.paleo.blog.tools.json.jackson.JacksonUtils;
 import com.paleo.blog.tools.mvc.ctrl.MSG;
-import com.paleo.blog.tools.mvc.ctrl.OPT;
 import com.paleo.blog.tools.mvc.page.PageUtils;
 import com.paleo.blog.tools.mvc.view.EmptyViewResolver;
 import com.paleo.blog.tools.mvc.view.JsonView;
@@ -54,40 +53,40 @@ public class RoleController extends BaseController{
 		return "sys/role/list_role";
 	}
 
-	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
-	public String add(Role bo,ModelMap rps){
-		if(IsOPT(OPT.ADD)){
-			//更新到数据库
-			try{
-				roleService.addRole(bo);
-				BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;
-		}
-		//返回视图
+	@RequestMapping(value = "add_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add_view(Role bo,ModelMap rps){
 		rps.addAttribute("bo",bo);
 		return "sys/role/add";
 	}
 	
-	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
-	public String edit(Role bo,ModelMap rps){
-		if(IsOPT(OPT.UPDATE)){
-			//更新到数据库
-			try{
-				roleService.updateRole(bo);
-				BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;
+	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add(Role bo,ModelMap rps){
+		try{
+			roleService.addRole(bo);
+			BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
 		}
-		//返回视图
+		return EmptyViewResolver.EMPTY_VIEW;
+	}
+	
+	@RequestMapping(value = "edit_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit_view(Role bo,ModelMap rps){
 		rps.addAttribute("bo",roleService.getRoleById(bo.getRoleId()));
 		return "sys/role/edit";
+	}
+	
+	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit(Role bo,ModelMap rps){
+		try{
+			roleService.updateRole(bo);
+			BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
+		}
+		return EmptyViewResolver.EMPTY_VIEW;
 	}
 	
 	@RequestMapping(value = "delete",  method = { RequestMethod.POST, RequestMethod.GET })
@@ -102,24 +101,24 @@ public class RoleController extends BaseController{
 		return EmptyViewResolver.EMPTY_VIEW;
 	}
 	
-	@RequestMapping(value = "authorize", method = { RequestMethod.POST, RequestMethod.GET })
-	public String authorize(@RequestParam(value="menuTreeArray",required=false) String menuTreeArray,Role bo,ModelMap rps){
-		if(IsOPT(OPT.AUTHORIZE)){
-			//更新到数据库
-			try{
-				roleService.authorizeRole(bo,JacksonUtils.json2List(menuTreeArray, Menu.class));
-				JsonView.success(res(), MSG.AUTHRIZE_SUCCESS.getMsg());
-			}catch(Exception e){
-				e.printStackTrace();
-				JsonView.error(res(),MSG.AUTHRIZE_FAIL.getMsg());
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
-		}
-		//返回视图
+	@RequestMapping(value = "authorize_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String authorize_view(Role bo,ModelMap rps){
 		List<Menu> menuList =  menuService.getMenuList();//登陆用户可分配的菜单
 		List<Menu> roleMenuList =  menuService.getRoleMenuList(bo.getRoleId());//角色已授权的菜单
 		rps.put("checkedMenuList",com.paleo.blog.model.sys.menu.Menu.buildCheckedMenus(menuList,roleMenuList));
 		rps.put("role", roleService.getRoleById(bo.getRoleId()));
 		return "sys/role/authorize";
+	}
+	
+	@RequestMapping(value = "authorize", method = { RequestMethod.POST, RequestMethod.GET })
+	public String authorize(@RequestParam(value="menuTreeArray",required=false) String menuTreeArray,Role bo,ModelMap rps){
+		try{
+			roleService.authorizeRole(bo,JacksonUtils.json2List(menuTreeArray, Menu.class));
+			JsonView.success(res(), MSG.AUTHRIZE_SUCCESS.getMsg());
+		}catch(Exception e){
+			e.printStackTrace();
+			JsonView.error(res(),MSG.AUTHRIZE_FAIL.getMsg());
+		}
+		return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
 	}
 }

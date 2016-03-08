@@ -15,7 +15,6 @@ import com.github.pagehelper.PageInfo;
 import com.paleo.blog.pojo.sys.menu.Menu;
 import com.paleo.blog.remote.sys.menu.IMenuService;
 import com.paleo.blog.tools.mvc.ctrl.MSG;
-import com.paleo.blog.tools.mvc.ctrl.OPT;
 import com.paleo.blog.tools.mvc.page.PageUtils;
 import com.paleo.blog.tools.mvc.view.EmptyViewResolver;
 import com.paleo.blog.tools.mvc.view.JsonView;
@@ -46,38 +45,38 @@ public class MenuController extends BaseController{
 		return "sys/menu/list_menu_tree";
 	}
 	
-	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
-	public String add(Menu bo,ModelMap rps){
-		if(IsOPT(OPT.ADD)){
-			//更新到数据库
-			try{
-				menuService.addMenu(bo);
-				BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
-		}
-		//返回视图
+	@RequestMapping(value = "add_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add_view(Menu bo,ModelMap rps){
 		rps.addAttribute("bo",bo);
 		return "sys/menu/add";
+	}
+	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add(Menu bo,ModelMap rps){
+		try{
+			menuService.addMenu(bo);
+			BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
+		}
+		return EmptyViewResolver.EMPTY_VIEW;
+	}
+	
+	@RequestMapping(value = "edit_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit_view(Menu bo,ModelMap rps){
+		rps.addAttribute("bo",menuService.getMenuById(bo.getMenuId()));
+		return "sys/menu/edit";
 	}
 	
 	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
 	public String edit(Menu bo,ModelMap rps){
-		if(IsOPT(OPT.UPDATE)){
-			try {
-				menuService.updateMenu(bo);
-				BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;
+		try {
+			menuService.updateMenu(bo);
+			BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
 		}
-		//返回视图
-		rps.addAttribute("bo",menuService.getMenuById(bo.getMenuId()));
-		return "sys/menu/edit";
+		return EmptyViewResolver.EMPTY_VIEW;
 	}
 	
 	@RequestMapping(value = "delete",  method = { RequestMethod.POST, RequestMethod.GET })

@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.github.pagehelper.PageInfo;
+import com.paleo.blog.core.token.annotation.Token;
+import com.paleo.blog.core.token.annotation.ValidToken;
 import com.paleo.blog.pojo.sys.dept.Dept;
 import com.paleo.blog.remote.sys.dept.IDeptService;
 import com.paleo.blog.remote.sys.user.IUserService;
 import com.paleo.blog.tools.mvc.ctrl.MSG;
-import com.paleo.blog.tools.mvc.ctrl.OPT;
 import com.paleo.blog.tools.mvc.page.PageUtils;
 import com.paleo.blog.tools.mvc.view.EmptyViewResolver;
 import com.paleo.blog.web.core.BaseController;
@@ -45,41 +46,43 @@ public class DeptController extends BaseController{
 		return "sys/dept/list_dept";
 	}
 	
-	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
-	public String add(Dept bo,ModelMap rps){
-		if(IsOPT(OPT.ADD)){
-			//更新到数据库
-			try{
-				deptService.addDept(bo);
-				BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;
-		}
-		//返回视图
+	@Token
+	@RequestMapping(value = "add_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add_view(Dept bo,ModelMap rps){
 		rps.addAttribute("deptTreeId",req().getParameter("deptTreeId"));//前端ztree的div id
 		rps.addAttribute("bo",bo);
 		return "sys/dept/add";
 	}
 	
-	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
-	public String edit(Dept bo,ModelMap rps){
-		if(IsOPT(OPT.UPDATE)){
-			//更新到数据库
-			try{
-				deptService.updateDept(bo);
-				BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
+	@ValidToken
+	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add(Dept bo,ModelMap rps){
+		try{
+			deptService.addDept(bo);
+			BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
 		}
-		//返回视图
+		return EmptyViewResolver.EMPTY_VIEW;
+	}
+	
+	@RequestMapping(value = "edit_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit_view(Dept bo,ModelMap rps){
 		rps.addAttribute("bo",deptService.getDeptById(bo.getDeptId()));
 		return "sys/dept/edit";
+	}
+	
+	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit(Dept bo,ModelMap rps){
+		try{
+			deptService.updateDept(bo);
+			BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
+		}
+		return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
 	}
 	
 	@RequestMapping(value = "delete",  method = { RequestMethod.POST, RequestMethod.GET })

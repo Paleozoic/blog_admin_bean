@@ -15,7 +15,6 @@ import com.geetest.sdk.java.GeetestLib;
 import com.paleo.blog.model.core.GeetestConfig;
 import com.paleo.blog.pojo.core.login.Login;
 import com.paleo.blog.tools.encrypt.MD5Utils;
-import com.paleo.blog.tools.mvc.ctrl.OPT;
 import com.paleo.blog.tools.mvc.view.EmptyViewResolver;
 import com.paleo.blog.tools.mvc.view.JsonView;
 import com.paleo.blog.web.core.BaseController;
@@ -26,33 +25,35 @@ public class LoginController extends BaseController{
 
 	private static Logger log = LoggerFactory.getLogger(LoginController.class);
 	
-	@RequestMapping("login")
-	public String login(Login bo){
+	@RequestMapping("login_view")
+	public String login_view(){
 		if(SecurityUtils.getSubject().isAuthenticated()){
 			return "redirect:/";
 		}
-		if(IsOPT(OPT.LOGIN)){
-		    try {
-		    	if(verify_captcha()){
-		    		UsernamePasswordToken token = new UsernamePasswordToken(bo.getUserName(),MD5Utils.customMD5(bo.getPassword()),bo.isRememberMe());
-		    		SecurityUtils.getSubject().login(token);
-//		            return "redirect:/";//改为前端通过ajax重定向
-		    	}else{
-		    		JsonView.error(res(), "验证码错误");
-		    	}
-	        } catch (AuthenticationException e) {
-	        	e.printStackTrace();
-	        	JsonView.error(res(), e.getMessage());
-	        }
-		    return EmptyViewResolver.EMPTY_VIEW;
-		}
 		return "_common/core/login/login";
+	}
+	
+	@RequestMapping("login")
+	public String login(Login bo){
+		try {
+	    	if(verify_captcha()){
+	    		UsernamePasswordToken token = new UsernamePasswordToken(bo.getUserName(),MD5Utils.customMD5(bo.getPassword()),bo.isRememberMe());
+	    		SecurityUtils.getSubject().login(token);
+//	            return "redirect:/";//改为前端通过ajax重定向
+	    	}else{
+	    		JsonView.error(res(), "验证码错误");
+	    	}
+        } catch (AuthenticationException e) {
+        	e.printStackTrace();
+        	JsonView.error(res(), e.getMessage());
+        }
+		return EmptyViewResolver.EMPTY_VIEW;
 	}
 	
 	@RequestMapping("logout")
 	public String logout(){
 		SecurityUtils.getSubject().logout();
-		return "redirect:/core/login";
+		return "redirect:/core/login_view";
 	}
 	
 	@RequestMapping("unauthorized")

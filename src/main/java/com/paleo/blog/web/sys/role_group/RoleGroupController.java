@@ -14,7 +14,6 @@ import com.paleo.blog.pojo.sys.role_group.RoleGroup;
 import com.paleo.blog.remote.sys.role.IRoleService;
 import com.paleo.blog.remote.sys.role_group.IRoleGroupService;
 import com.paleo.blog.tools.mvc.ctrl.MSG;
-import com.paleo.blog.tools.mvc.ctrl.OPT;
 import com.paleo.blog.tools.mvc.page.PageUtils;
 import com.paleo.blog.tools.mvc.view.EmptyViewResolver;
 import com.paleo.blog.web.core.BaseController;
@@ -45,41 +44,41 @@ public class RoleGroupController extends BaseController{
 		return "sys/role_group/list_role_group";
 	}
 	
-	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
-	public String add(RoleGroup bo,ModelMap rps){
-		if(IsOPT(OPT.ADD)){
-			//更新到数据库
-			try{
-				roleGroupService.addRoleGroup(bo);
-				BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;
-		}
-		//返回视图
+	@RequestMapping(value = "add_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add_view(RoleGroup bo,ModelMap rps){
 		rps.addAttribute("roleGroupTreeId",req().getParameter("roleGroupTreeId"));//前端ztree的div id
 		rps.addAttribute("bo",bo);
 		return "sys/role_group/add";
 	}
 	
-	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
-	public String edit(RoleGroup bo,ModelMap rps){
-		if(IsOPT(OPT.UPDATE)){
-			//更新到数据库
-			try{
-				roleGroupService.updateRoleGroup(bo);
-				BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
-			}catch(Exception e){
-				e.printStackTrace();
-				BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
-			}
-			return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
+	@RequestMapping(value = "add", method = { RequestMethod.POST, RequestMethod.GET })
+	public String add(RoleGroup bo,ModelMap rps){
+		try{
+			roleGroupService.addRoleGroup(bo);
+			BjuiView.success(MSG.ADD_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.ADD_FAIL.getMsg(),false);
 		}
-		//返回视图
+		return EmptyViewResolver.EMPTY_VIEW;
+	}
+	
+	@RequestMapping(value = "edit_view", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit_view(RoleGroup bo,ModelMap rps){
 		rps.addAttribute("bo",roleGroupService.getRoleGroupById(bo.getRoleGroupId()));
 		return "sys/role_group/edit";
+	}
+	
+	@RequestMapping(value = "edit", method = { RequestMethod.POST, RequestMethod.GET })
+	public String edit(RoleGroup bo,ModelMap rps){
+		try{
+			roleGroupService.updateRoleGroup(bo);
+			BjuiView.success(MSG.UPDATE_SUCCESS.getMsg(),true);
+		}catch(Exception e){
+			e.printStackTrace();
+			BjuiView.fail(MSG.UPDATE_FAIL.getMsg(),false);
+		}
+		return EmptyViewResolver.EMPTY_VIEW;//我估计去掉FreeMarker的配置，这里返回null也可以
 	}
 	
 	@RequestMapping(value = "delete",  method = { RequestMethod.POST, RequestMethod.GET })

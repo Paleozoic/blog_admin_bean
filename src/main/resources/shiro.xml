@@ -6,7 +6,7 @@
        
 		<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		    <property name="securityManager" ref="securityManager"/>
-		    <property name="loginUrl" value="/core/login"/>
+		    <property name="loginUrl" value="/core/login_view"/>
 		    <property name="unauthorizedUrl" value="/core/unauthorized"/>
 		</bean>
 		
@@ -15,6 +15,7 @@
 			<property name="definitions">
 				<value>
 					/resources/** = anon
+					/core/login = anon
 					<!-- 验证码路径 -->
 					/core/start_captcha = anon
 					<!-- web service -->
