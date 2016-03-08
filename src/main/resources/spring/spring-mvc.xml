@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans.xsd        
-     	http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc 
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
@@ -29,28 +29,39 @@
     <context:component-scan base-package="com.paleo.blog.web" />
     <mvc:default-servlet-handler />
     
-    <mvc:interceptors>
-		<!-- web资源拦截器，通过此拦截器将request,response等存进ThreadLocal -->
-		<bean class="com.paleo.blog.tools.http.resource.RequestResourceInterceptor" />
-		<!-- 登陆拦截器，存储一些账号信息进session -->
-		<bean class="com.paleo.blog.web.core.interceptor.LoginInterceptor" />
-	</mvc:interceptors>
-	
+    <mvc:interceptors>  
+        <mvc:interceptor>  
+            <!-- web资源拦截器，通过此拦截器将request,response等存进ThreadLocal -->
+            <mvc:mapping path="/**"/> 
+            <bean class="com.paleo.blog.tools.http.resource.RequestResourceInterceptor" />  
+        </mvc:interceptor> 
+        <mvc:interceptor>  
+            <!-- 登陆拦截器，存储一些账号信息进session -->
+            <mvc:mapping path="/core/login"/>  
+            <bean class="com.paleo.blog.web.core.interceptor.LoginInterceptor" />  
+        </mvc:interceptor> 
+        <mvc:interceptor>  
+            <!-- Token拦截器，解析前端token，生成token到前端 -->
+            <mvc:mapping path="/**"/> 
+            <bean class="com.paleo.blog.web.core.interceptor.TokenInterceptor" />  
+        </mvc:interceptor>  
+    </mvc:interceptors>
+    
     <import resource="classpath:freemarker.xml" /> 
     
     <!-- 配置freeMarker视图解析器,取代SpringMVC的视图解析器：-->
     <!-- <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/jsp/" p:suffix=".jsp" /> -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
-		<property name="order" value="2" /><!-- 此视图解析优先级为2，低于freemarker.xml里面的emptyViewResolver -->
-		<property name="viewClass" value="org.springframework.web.servlet.view.freemarker.FreeMarkerView" />
-		<property name="contentType" value="text/html; charset=utf-8" />
-		<property name="suffix" value=".htm" />
-		<property name="cache" value="true" />
-		<property name="requestContextAttribute" value="request" />
-		<property name="exposeSpringMacroHelpers" value="true" />
-		<property name="exposeRequestAttributes" value="true" />
-		<property name="exposeSessionAttributes" value="true" />
-		<property name="attributesMap" ref="freemarkerStaticModels" />
-	</bean>
-	
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <property name="order" value="2" /><!-- 此视图解析优先级为2，低于freemarker.xml里面的emptyViewResolver -->
+        <property name="viewClass" value="org.springframework.web.servlet.view.freemarker.FreeMarkerView" />
+        <property name="contentType" value="text/html; charset=utf-8" />
+        <property name="suffix" value=".htm" />
+        <property name="cache" value="true" />
+        <property name="requestContextAttribute" value="request" />
+        <property name="exposeSpringMacroHelpers" value="true" />
+        <property name="exposeRequestAttributes" value="true" />
+        <property name="exposeSessionAttributes" value="true" />
+        <property name="attributesMap" ref="freemarkerStaticModels" />
+    </bean>
+    
 </beans>

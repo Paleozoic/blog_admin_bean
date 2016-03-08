@@ -2,7 +2,7 @@ package com.paleo.blog.log.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -30,7 +30,7 @@ public class LogAspect {
 		return null;
 	}
 
-	@After("execution(* com.paleo.blog.remote..*(..))")
+	@AfterReturning("execution(* com.paleo.blog.remote..*(..))")
 	public void doAfter(JoinPoint jp) {
 		String clazzName = jp.getTarget().getClass().getName();
 		String methodName = jp.getSignature().getName();

@@ -125,7 +125,7 @@
         height:400,
         mask:true,
         data:{"upperMenuId":treeNode.menuId,"upperMenuName":treeNode.menuName,"orderNo":Common.isEmpty(treeNode.children)?1:treeNode.children.length+1},
-        url:"sys/menu/add"
+        url:"sys/menu/add_view"
       });
     });
     //点击编辑btn
@@ -138,7 +138,7 @@
         height:400,
         mask:true,
         data:{"menuId":treeNode.menuId},
-        url:"sys/menu/edit"
+        url:"sys/menu/edit_view"
       });
     });
     //点击删除btn

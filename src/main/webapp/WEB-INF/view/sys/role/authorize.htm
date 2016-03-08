@@ -75,7 +75,7 @@
 	   $.ajax({
           type:"POST",
           url:"sys/role/authorize",
-          data: {"opt":"authorize","roleId":${role.roleId},"menuTreeArray":JSON.stringify(treeObj.getCheckedNodes(true))},
+          data: {"roleId":${role.roleId},"menuTreeArray":JSON.stringify(treeObj.getCheckedNodes(true))},
           success:function(msg){
             $(this).alertmsg('correct',msg);
             curdlg.dialog("closeCurrent");

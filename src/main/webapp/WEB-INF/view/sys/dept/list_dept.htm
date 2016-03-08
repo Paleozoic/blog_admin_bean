@@ -11,7 +11,7 @@
     </form>
     <div class="bjui-headBar" style="margin-top:10px;">
     	<@shiro.hasPermission name="sys.dept.add">  
-    	<a href="sys/dept/add?deptTreeId=${deptTreeId}" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="500" data-height="400"  data-mask="true" data-id="add_dept_dlg">添加</a>
+    	<a href="sys/dept/add_view?deptTreeId=${deptTreeId}" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="500" data-height="400"  data-mask="true" data-id="add_dept_dlg">添加</a>
     	</@shiro.hasPermission>
     </div>
 </div>
@@ -31,7 +31,7 @@
     		<td>
     		<#if dept.upperDeptId!=0>
     			<@shiro.hasPermission name="sys.dept.edit"> 
-    			<a href="sys/dept/edit?deptId=${dept.deptId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
+    			<a href="sys/dept/edit_view?deptId=${dept.deptId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
     			</@shiro.hasPermission>
     			<@shiro.hasPermission name="sys.dept.delete"> 
     			<a href="sys/dept/delete?deptId=${dept.deptId}" class="btn btn-red" data-toggle="doajax" data-confirm-msg="确定要删除吗？" data-icon="remove"></a>

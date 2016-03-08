@@ -92,7 +92,7 @@
 		        height:400,
 		        mask:true,
 		        data:{"upperRoleGroupId":treeNode.roleGroupId,"upperRoleGroupName":treeNode.roleGroupName,"roleGroupTreeId":"roleGroupTree_${pageId}","orderNo":Common.isEmpty(treeNode.children)?1:treeNode.children.length+1},
-		        url:"sys/role_group/add"
+		        url:"sys/role_group/add_view"
 		      });
 		    });
 		    //点击编辑btn
@@ -105,7 +105,7 @@
 		        height:400,
 		        mask:true,
 		        data:{"roleGroupId":treeNode.roleGroupId},
-		        url:"sys/role_group/edit"
+		        url:"sys/role_group/edit_view"
 		      });
 		    });
 		    //点击删除btn

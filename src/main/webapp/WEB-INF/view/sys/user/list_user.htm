@@ -16,7 +16,7 @@
     </form>
     <div class="bjui-headBar" style="margin-top:10px;">
     	<@shiro.hasPermission name="sys.user.add">
-    	<a href="sys/user/add" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="500" data-height="400"  data-mask="true" data-id="add_user_dlg">添加</a>
+    	<a href="sys/user/add_view" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="500" data-height="400"  data-mask="true" data-id="add_user_dlg">添加</a>
 	    </@shiro.hasPermission>
 	    &nbsp;
     </div>
@@ -40,10 +40,10 @@
         	<td>${user.realName}</td>
     		<td>
     			<@shiro.hasPermission name="sys.user.authorize">
-    			<a href="sys/user/authorize?user.userId=${user.userId}" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="640" data-height="550"  data-mask="true" data-id="authorize_user_dlg">授权</a>
+    			<a href="sys/user/authorize_view?user.userId=${user.userId}" class="btn btn-green" data-icon="plus" data-toggle="dialog" data-resizable="false" data-maxable="false" data-width="640" data-height="550"  data-mask="true" data-id="authorize_user_dlg">授权</a>
     			</@shiro.hasPermission>
     			<@shiro.hasPermission name="sys.user.edit">
-    			<a href="sys/user/edit?userId=${user.userId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
+    			<a href="sys/user/edit_view?userId=${user.userId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
     			</@shiro.hasPermission>
     			<@shiro.hasPermission name="sys.user.delete">
     			<a href="sys/user/delete?userId=${user.userId}" class="btn btn-red" data-toggle="doajax" data-confirm-msg="确定要删除吗？" data-icon="remove" data-callback="function(){$(this).navtab('refresh');}"></a>

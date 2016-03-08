@@ -1,7 +1,6 @@
 <#assign pageId = UUIDUtils.getUUID() >
 <div class="bjui-pageContent">
     <form id="roleGroupForm" class="pageForm" action="sys/role_group/edit"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
-    	<input type="hidden" name="opt" value="update">
     	<input type="hidden" name="roleGroupId" value="${bo.roleGroupId}"/>
     	<input type="hidden" id="upperRoleGroupId_${pageId}" name="upperRoleGroupId" value="${bo.upperRoleGroupId}"/>
     	<input type="hidden" name="orderNo" value="${bo.orderNo}"/>

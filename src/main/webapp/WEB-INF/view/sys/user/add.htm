@@ -1,7 +1,6 @@
 <#assign pageId = UUIDUtils.getUUID() >
 <div class="bjui-pageContent">
     <form class="pageForm" action="sys/user/add"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
-    	<input type="hidden" name="opt" value="add">
     	<input type="hidden" id="deptId_${pageId}" name="deptId" value="${bo.deptId}"/>
         <table class="table table-condensed table-hover">
             <tbody>

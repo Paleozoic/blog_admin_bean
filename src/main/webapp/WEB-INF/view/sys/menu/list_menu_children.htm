@@ -33,7 +33,7 @@
           <td><@basic.menuType type=cmenu.type /></td>
 	      <td>
 	       	 <@shiro.hasPermission name="sys.menu.edit">
-	         <a href="sys/menu/edit?menuId=${cmenu.menuId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
+	         <a href="sys/menu/edit_view?menuId=${cmenu.menuId}" class="btn btn-blue" data-toggle="dialog" data-width="500" data-height="400" data-id="dialog-mask" data-mask="true" data-icon="edit"></a>
 	         </@shiro.hasPermission>
 	         <@shiro.hasPermission name="sys.menu.delete">
 	         <a href="sys/menu/delete?menuId=${cmenu.menuId}" class="btn btn-red" data-toggle="doajax" data-confirm-msg="确定要删除吗？" data-icon="remove" data-callback="cmenution(){$(this).navtab('refresh');}"></a>

@@ -1,7 +1,6 @@
 <#assign pageId = UUIDUtils.getUUID() >
 <div class="bjui-pageContent">
     <form class="pageForm" action="sys/user/authorize"  data-toggle="validate" data-alertmsg="false" data-reload-navtab="true">
-    	<input type="hidden" name="opt" value="authorize">
     	<input type="hidden"  name="user.userId" value="${user.userId}"/>
 	    <div class="alert alert-info form-inline"><i class="fa fa-info-circle"></i> 用户[${user.userName}]的授权：</div>
 	    <div class="alert alert-danger form-inline"><i class="fa fa-info-circle"></i>(已选角色应该加一列checkbox，表示用户是否拥有该角色的授权权限0.0#但是前端比较渣，搁置)</div>
